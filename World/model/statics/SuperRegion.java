@@ -1,12 +1,13 @@
 // ==== Package ==== :
 package World.model.statics;
 
-import World.api.RegionTemplateAccessibility;
 // ==== General ==== :
-import World.model.templates.RegionTemplate;
 
 import java.util.ArrayList;
 
+// ==== Interfaces ==== :
+
+import World.api.RegionTemplateAccessibility;
 
 
 /*  Class in charge of creating regions with both static & dynamic objects.
@@ -26,7 +27,7 @@ public class SuperRegion extends Region{
     // ==== Fields ==== :
     
     ArrayList<Supercell> trajectories;
-    RegionTemplate traits;
+    RegionTemplateAccessibility traits;
 
 
 
