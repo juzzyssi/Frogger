@@ -23,7 +23,7 @@ public abstract class Cell extends Rectangle implements Associative, Anchorable{
     // ==== Fields ==== :
 
     // Concrete:
-    public final static int WIDTH = 80;
+    public final static int WIDTH = 56;
 
     // Instances:    
     private ArrayList<Object> family = new ArrayList<>(0); /* Associative-functionality field */

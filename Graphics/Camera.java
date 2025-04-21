@@ -31,7 +31,7 @@ public class Camera extends JPanel {
     @Override
     protected void paintComponent( Graphics g ){
         super.paintComponent(g);
-        this.world.render(g, null);
+        this.world.render(g, this);
     }
 
     public Point getPosition(){
