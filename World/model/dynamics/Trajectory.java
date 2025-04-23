@@ -7,33 +7,22 @@ import java.util.ArrayList;
 
 import Math.Curves;
 import Math.Vector;
-
-// ==== Interfaces ==== :
-import World.api.LoopIntegration;
+import World.api.engine.LoopIntegration;
 
 
 
-/*  If I ever need to introduce extra utility. (I planned to, but some of it is currently irrelevant)
- */
+/* Time is in nano-seconds, points must be arranged from first to last */
 public class Trajectory implements LoopIntegration{
-
-    // Add something like intended velocity and based on that, make arrangements for "time" in order to reconciliate it 
-    // with the standard bernsteinPol approach ( tE[0, 1] ) and the estimated duration.
 
     // ==== Fields ==== :
 
     // Instances:
-    private ArrayList<Point> points;
+    private ArrayList<Point> points; /* Path generation */
 
-    /* LoopIntegration-functionality fields */
-    private long internalTime = System.nanoTime();
-    private long previousInternalTime = 0;
-    
-    private double ellapsedTime = 0.0;
-    private double previousEllapsedTime  = 0.0;
+    private long internalTime, duration, offset; /* LoopIntegration fields */
+    private boolean updated = false;
 
-    public double duration;
-
+    public Vector position; /* Anchorable-functionality field */
     
 
 
@@ -41,13 +30,19 @@ public class Trajectory implements LoopIntegration{
 
     // LoopIntegration:
     @Override
-    public void update( long time ){
-        /* See the "differentiation" method for reference */
-        this.previousEllapsedTime = this.ellapsedTime;
-        this.ellapsedTime = time - this.internalTime;
-
-        this.previousInternalTime = internalTime;
-        this.internalTime = time;
+    public void checkIn( long time ){
+        if( !this.updated ){
+            this.updated = true;
+            
+            this.internalTime = time;
+            this.position.set( this.getAt(this.internalTime) );
+        }
+    }
+    @Override
+    public void checkOut( long time ){
+        if( this.updated ){
+            this.updated = false;
+        }
     }
 
 
@@ -55,10 +50,9 @@ public class Trajectory implements LoopIntegration{
     // ==== Methods ==== :
 
     // Instances:
-    public Vector getAt( double time ){ // returns a vector from 
+    public Vector getAt( long time ){                                     // I.M.S. 0 ()
 
-        time /= this.duration;
-        time = 0 > time ? 0 : (time > 1 ? 1 : time);
+        double dTime = ((time + this.offset) % this.duration) / (double) this.duration; /* Constraints time */
 
         double[] x = new double[ this.points.size() ];
         double[] y = new double[ this.points.size() ];
@@ -68,35 +62,39 @@ public class Trajectory implements LoopIntegration{
             y[i] = this.points.get(i).getY();
         }
 
-        return new Vector( Curves.bernsteinPolynomial(x, time), Curves.bernsteinPolynomial(y, time) );
+        return new Vector( Curves.bernsteinPolynomial(x, dTime), Curves.bernsteinPolynomial(y, dTime) );
     }
 
-    public Vector differentiate( double time ){
-        /*  The problem with calculating a non-limit derivate of a given curve, is that over longer periods of time
-         *  the discrepances between the real value of the derivate AND the called vector become substantial;
-         * 
-         *  To reduce this, based on previous differences of time not only can we estimate when the next call will be and thus,
-         *  the difference of vectors; but we can also compare it with previous "ellapsed time" (ellapsedTimeDifference) and add
-         *  back the discrepancy as corrector vector.
-         * 
-         *  That way, over even longer periods of time, the only downfalls to the algorithm
-         *  are those introduced by doubles decimal discrepancies.
-         */
-        Vector difference = this.getAt(time + this.ellapsedTime);
-        difference.subtract( this.getAt(time) );
-
-        Vector tweak = this.getAt( this.internalTime );
-        tweak.subtract( this.getAt( this.previousInternalTime + this.previousEllapsedTime ) );
-
-        difference.add(tweak);
-        return difference;
-    }
 
 
     // ==== Constructors ==== :
 
-    public Trajectory( ArrayList<Point> points, double duration ){
-        this.duration = duration;
+    public Trajectory( ArrayList<Point> points, double duration, double offset ){
+        /* duration & offsegt are given in secs */
+        this.duration = (long) (duration*Math.pow(10, 9));
+        this.offset = (long) (offset*Math.pow(10, 9));
+        this.internalTime = System.nanoTime();
+
         this.points = points;
+
+        // Initial setting:
+
+        Point temporal = Curves.bezierCurve( this.points, (double) ( ((this.internalTime + this.offset) % this.duration) / this.duration) );
+        this.position = new Vector( temporal.getX(), temporal.getY() );
+    }
+    public Trajectory( Point point1, Point point2, double duration, double offset ){
+        /* duration & offsegt are given in secs */
+        this.duration = (long) (duration*Math.pow(10, 9));
+        this.offset = (long) (offset*Math.pow(10, 9));
+        this.internalTime = System.nanoTime();
+
+        this.points = new ArrayList<>(2);
+        this.points.set(0, point1);
+        this.points.set(1, point2);
+
+        // Initial setting:
+
+        Point temporal = Curves.bezierCurve( this.points, (double) ( ((this.internalTime + this.offset) % this.duration) / this.duration) );
+        this.position = new Vector( temporal.getX(), temporal.getY() );
     }
 }

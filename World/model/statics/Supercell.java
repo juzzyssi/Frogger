@@ -8,22 +8,26 @@ import java.awt.Point;
 import World.model.World;
 
 import Graphics.Camera;
+import Math.Vector;
 
 // ==== Interfaces ==== :
-import World.api.Renderable;
-import World.api.AudioEmissor;
-import World.api.CellTemplateAccessibility;
+import World.api.engine.Renderable;
+import World.api.template.CellTemplateAccessibility;
 
 
 
-/* SuperCell instances extend Cell instances fields to implement native "traits", such as the appearance, sound, and behavior of a Cell.
+/*  General Documentation:
+ *
+ *  SuperCell instances introduce common fields of variance among Cell instances (such as traversability or visuals).
+ *  They inherit their properties from a single source through an interface (CellTemplateAccessibility); this is to avoid
+ *  unnecessary memory weight.
  */
-public class Supercell extends Cell implements Renderable, AudioEmissor{
+public class Supercell extends Cell implements Renderable{
 
     // ==== Fields ==== :
 
     // Instances:
-    private CellTemplateAccessibility traits;
+    public CellTemplateAccessibility traits;
 
 
 
@@ -32,35 +36,45 @@ public class Supercell extends Cell implements Renderable, AudioEmissor{
     // Renderable:
     @Override
     public void render( Graphics g, Camera camera ){
-        /*  Supercell instances' rendering process simulate selective displayal by transformating their relative position from the family's
-         *  World instance to the intended Camera instance "frame".
-         */
+        /*  Supercell instances' rendering process simulate selective displayal by transformating their relative anchor position
+        to the intended Camera instance's "frame". */
 
-        if( this.hasMember(World.class) ){
+        /* Determines displacement */
+        Vector cameraPosition = camera.getPosition();
 
-            /* Determines the dis */
-            Point cameraPosition = camera.getPosition();
-            World parentWorld = this.getFamilyMember( World.class );
-
-            int displacedX = this.x - (cameraPosition.x - parentWorld.anchor.x);
-            int displacedY = this.y - (cameraPosition.y - parentWorld.anchor.y);
-
-            g.drawImage(
-                this.traits.getImage(),
-                displacedX, displacedY,
-                this.width, this.height,
-                null
-            );
+        if( !this.hasMember( World.class ) ){
+            throw new IllegalArgumentException(""+this.toString()+" has no World instance associative");
         }
-        else{
-            throw new IllegalArgumentException("Family of "+this.toString()+" has no \"World\" instance");
-        }
+
+        // world origin will always be (0, 0); this is just decorative
+        World world = this.getFamilyMember( World.class );
+
+        /* Temp fix */
+        int displacedX = (int) ( this.displacement.getX() - (cameraPosition.getX() - world.x) );
+        int displacedY = (int) ( this.displacement.getY() - (cameraPosition.getY() - world.y) );
+
+        g.drawImage(
+            this.traits.getImage(),
+            displacedX, displacedY,
+            this.width, this.height,
+            null
+        );
     }
 
-    // AudioEmissor:
+    // Traversable:
+
+    /* Traits used to determine "event's" outcomes */
     @Override
-    public void play(){
-        // W.I.P: plays an object's native sound.
+    public int getIdentity(){
+        return this.traits.getIdentity();
+    }
+    @Override
+    public boolean getTraversability(){
+        return this.traits.getTraversability();
+    }
+    @Override
+    public int getEffect(){
+        return this.traits.getEffect();
     }
 
 
@@ -70,9 +84,8 @@ public class Supercell extends Cell implements Renderable, AudioEmissor{
     // Instances:
     @Override                                                       // I.M.S. 0 ( generic utility )
     public String toString(){
-        return String.format("SuperCell[ pos=(x=%d, y=%d, width=%d, height=%d), parent=%s, identity=%d ]",
+        return String.format("SuperCell[ pos=(x=%d, y=%d, width=%d, height=%d), identity=%d ]",
         this.x, this.y, this.width, this.height,
-        this.hasMember( Region.class ) ? this.getFamilyMember( Region.class ) : this.getFamilyMember( World.class ),
         this.traits.getIdentity()
         );
     }

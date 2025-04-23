@@ -4,21 +4,23 @@ package World.model.statics;
 // ==== General ==== :
 import java.awt.*;
 import java.util.ArrayList;
+
+import Math.Vector;
 import World.model.World;
 
 // ==== Interfaces ==== :
 import World.api.Associative;
-import World.api.Anchorable;
+import World.api.Traversable;
 
 
 
-/*  Cell is a fundamental Class present in scenarios that invovle "static" terrain functionality, or "data". Classes such as
- *  Region and World are, essentially, virtual collectors / managers of Cell instances.
- * 
- *  Cell instances extend the class java.awt.Rectangle to manage collisions and coordinate-based logical operations such as;
- *  - Terrain traversability,  
+/*  General Documentation:
+ *
+ *  Cell is the building class of a World's "terrain". Essentially, Region (or SuperRegion) instances are virtual managers of 
+ *  Cell (or Supercell) instance collections. They inherit from java.awt.Rectangle in order to implememnt collision's and 
+ *  space logic.
  */
-public abstract class Cell extends Rectangle implements Associative, Anchorable{
+public abstract class Cell extends Rectangle implements Associative, Traversable{
 
     // ==== Fields ==== :
 
@@ -27,7 +29,7 @@ public abstract class Cell extends Rectangle implements Associative, Anchorable{
 
     // Instances:    
     private ArrayList<Object> family = new ArrayList<>(0); /* Associative-functionality field */
-    public Point anchor = new Point(0, 0); /* Anchorable-functionality field */
+    public Vector displacement;
 
 
 
@@ -95,28 +97,14 @@ public abstract class Cell extends Rectangle implements Associative, Anchorable{
         }
     }
 
-    // Anchorability:
+    // Traversability:
     @Override
-    public Point getAnchor(){
-        return this.anchor;
+    public void anchorTo( Traversable object ){
+        throw new IllegalAccessError("Cells anchor ( Vector=[0, 0] ) is immutable");
     }
-
     @Override
-    public void anchorTo( Object object ){
-        if( object instanceof Anchorable ){
-            Point newAnchor = ( (Anchorable)object ).getAnchor();
-            
-            this.x -= this.anchor.x;
-            this.x += newAnchor.x;
-
-            this.y -= this.anchor.y;
-            this.y += newAnchor.y;
-
-            this.anchor = newAnchor;
-        }
-        else{
-            throw new IllegalArgumentException( ""+object.toString()+" is not an Anchorable instance" );
-        }
+    public Vector getAnchor(){
+        return this.displacement;
     }
 
 
@@ -142,13 +130,16 @@ public abstract class Cell extends Rectangle implements Associative, Anchorable{
             return new Point( this.x + Cell.WIDTH/2, this.y + Cell.WIDTH/2 );
         }
         else{
-            throw new IllegalArgumentException( String.format("%s does not contains Point[ x=%.0f, y=%.0f ]",
+            throw new IllegalArgumentException( String.format("%s does not contain Point[ x=%.0f, y=%.0f ]",
             this.toString(), x, y)
             );
         }
     }
     public Point toCentre( Point point ){
         return this.toCentre( point.getX(), point.getY() );
+    }
+    public Point toCentre( Vector vector ){
+        return this.toCentre( vector.getX(), vector.getY() );
     }
     public Point toCentre( int x, int y ){
         return this.toCentre( (double)(x), (double)(y) );
@@ -160,11 +151,14 @@ public abstract class Cell extends Rectangle implements Associative, Anchorable{
 
     public Cell( Point pos ){
         super( pos.x, pos.y, Cell.WIDTH, Cell.WIDTH);
+        this.displacement = new Vector( pos.getX(), pos.getY());
     }
     public Cell( int x, int y ){
         super( x, y, Cell.WIDTH, Cell.WIDTH);
+        this.displacement = new Vector( x, y);
     }
     public Cell( double x, double y ){
         super( (int) (x), (int) (y), Cell.WIDTH, Cell.WIDTH);
+        this.displacement = new Vector(x, y);
     }
 }

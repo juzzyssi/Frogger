@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import Util.RandomSet;
@@ -15,38 +16,35 @@ import World.model.statics.Cell;
 import World.model.statics.SuperRegion;
 
 import Graphics.Camera;
+import Math.Vector;
 
 // ==== Interfaces ==== :
 
-import World.api.Associative;
-import World.api.LoopIntegration;
-import World.api.RegionTemplateAccessibility;
-import World.api.Renderable;
-import World.api.Anchorable;
+
+import World.api.engine.LoopIntegration;
+import World.api.engine.Renderable;
+import World.api.template.RegionTemplateAccessibility;
 
 
 
-/* Worlds are the parent class of all "static" & "dynamic" world generation (terrain, interactives, etc.).
- * Worlds are responsible for any interaction with other game elements such as:
- * "cameras", "dynamic" objects, "static" objects or interactive features overall.
+/*  Worlds are "god" classes that operate as both orchestrators and an interface between the game's "model" instances and the engine.
+ *  World classes--for the most part--delegate "actions" to its "sub-components"
  * 
- * Static and dynamic objects are managed separately.
- * 
- * The class could be worked to procedurally generate terrain that's not limited to uniquelyu expressable rectangles;
- * I don't think I'll have time for that
  */
-public class World extends Rectangle implements Renderable, Associative, LoopIntegration, Anchorable{
+public class World extends Rectangle implements Renderable, LoopIntegration{
 
     // ==== Fields ==== :
 
     // Instances:
-    public ArrayList<Object> family = new ArrayList<>(0);
     public ArrayList<Supercell> terrain = new ArrayList<>(0);
-
     public ArrayList<SuperRegion> regions = new ArrayList<>(0);
 
-    public Point anchor = new Point(0 ,0);
-    public long time;
+    public final Vector anchor = new Vector(0 ,0);
+    public long time = System.nanoTime();
+
+    private boolean updated = false;
+
+    // public Frog player;
 
 
 
@@ -57,128 +55,87 @@ public class World extends Rectangle implements Renderable, Associative, LoopInt
     public void render( Graphics g, Camera camera ){
         /* Expect rendering mistakes as a moving camera is implemented due to the limit of drawing reference frame from which cells are called */
 
+        // ==== Static Instances ==== :
+
+        // Calls all SuperCells on a given Camera instance's Rectangle to be "drawn"
         if( this.contains( camera.getRectangle() )){
 
-            /* Calls all SuperCells on a given rect to "be drawn" */
-            Point cameraPosition = camera.getPosition();
+            Vector cameraPosition = camera.getPosition();
             Dimension cameraDimension = camera.getDimensions();
 
-            for( int iy=cameraPosition.y ; iy<cameraPosition.y+cameraDimension.height ; iy+=Cell.WIDTH ){
-                for( int ix=cameraPosition.x ; ix<cameraPosition.x+cameraDimension.width ; ix+=Cell.WIDTH ){
+            // Position iteration based on Cell.WIDTH symetry
+            for( int iy=(int)(cameraPosition.getY()) ; iy<(int)(cameraPosition.getY())+cameraDimension.height ; iy+=Cell.WIDTH ){
+                for( int ix=(int)(cameraPosition.getX()) ; ix<(int)(cameraPosition.getX())+cameraDimension.width ; ix+=Cell.WIDTH ){
 
                     this.getAt( ix, iy ).render(g, camera);
                 }
             }
         }
         else{
-            throw new IllegalArgumentException( String.format("camera[ x=%d, y=%d, width=%d, height=%d ] is out of World[ x=%d, y=%d, width=%d, height=%d]",
-            camera.getPosition().x, camera.getPosition().y, camera.getDimensions().width, camera.getDimensions().height,
+            throw new IllegalArgumentException( String.format("camera[ x=%d, y=%d, width=%d, height=%d ] is out of World[ x=%.2f, y=%.2f, width=%d, height=%d]",
+            camera.getPosition().getX(), camera.getPosition().getY(), camera.getDimensions().width, camera.getDimensions().height,
             this.x, this.y, this.width, this.height)
             );
         }
-    }
 
-    // Associative:
-    @Override
-    public boolean isFamily( Object object ){
-        return this.family.contains(object);
-    }
-
-    @Override
-    public <T> boolean hasMember( Class<T> clazz ){
-        
-        for( Object i : this.family ){
-            if( i.getClass().equals(clazz) ){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public <T> T getFamilyMember( Class<T> clazz ){
-        if( clazz.equals(this.getClass())){
-            return clazz.cast( this );
-        }
-        else{
-            for( Object i : this.family ){
-                if( clazz.equals( i.getClass() ) ){
-                    return clazz.cast( i );
-                }
-            }
-            throw new IllegalArgumentException("no" + clazz.getName() + "was found in" + this.toString() );
-        }
-    }
-
-    @Override
-    public void adopt( Object object ){
-        if( this.getClass().equals( object.getClass() ) ){
-            throw new IllegalArgumentException("Worlds cannot belong to a family with existing Worlds");
-        }
-        else if( !(this.isFamily(object)) ){
-            boolean adopted = false;
-
-            /* if any object in this family shares classes; the old one is replaced */
-            for( Object i : this.family ){
-                if( i.getClass().equals(object.getClass()) ){
-                    this.family.remove( this.getFamilyMember( object.getClass() ) );
-                    this.family.add( object );
-                    adopted = true;
-                }
-            }
-            /* Otherwise, the object is simly "adopted" */
-            if( !(adopted) ){
-                this.family.add( object );
-            }
-        }
+        // ==== LooIntegrated Instances ==== : W.I.P.
     }
 
     // LoopIntegration
-    @Override
-    public void update( long time ){
-        // W.I.P.
-    }
+    public void checkIn( long time ){
+        if( !this.updated ){
+            this.updated = true;
 
-    // Anchorable:
-    @Override
-    public Point getAnchor(){
-        return this.anchor;
+            /* So far, only superRegion instances require "loop'-updates" */
+            for( LoopIntegration i : this.regions ){
+                i.checkIn( time );
+            }    
+        }
     }
-    @Override
-    public void anchorTo( Object object ){
-        throw new IllegalArgumentException( "World instances cannot mutate anchors / origins" );
-    }
+    
+    public void checkOut( long time ){
+        if( this.updated ){
+            this.updated = false;
 
+            /* So far, only superRegion instances require "loop'-updates" */
+            for( LoopIntegration i : this.regions ){
+                i.checkOut( time );
+            }    
+        }
+    }
 
 
     // ==== Methods ==== :
 
     // Instances:
+
+    /* KEY */
     private int calculateIndex( double doubleX, double doubleY ){                        // I.M.S. 0 ()
-        /* int casting leaves the index */
+        /* Calculates the index of a given instance in it's collection of Supercell instances by taking advantage of 
+        int casting and the order of instance addition to the collection */
 
         int newX = (int)(doubleX);
         int newY = (int)(doubleY);
         /* Casting doubles to integers to avoid unforseen effects of double's off decimals */
 
         if( this.contains(newX, newY) ){
-            int x_index = (newX + this.anchor.x - this.x) / Cell.WIDTH;
+            int x_index = (newX + (int)(this.anchor.getX()) - this.x) / Cell.WIDTH;
             x_index = x_index == this.getColumns() ? x_index - 1 : x_index;
 
-            int y_index = (newY + this.anchor.y - this.y) / Cell.WIDTH;
+            int y_index = (newY + (int)(this.anchor.getY()) - this.y) / Cell.WIDTH;
             y_index = y_index == this.getRows() ? y_index - 1 : y_index;
         
             return y_index * this.getColumns() + x_index;
         }
         else{
-            throw new IllegalArgumentException( String.format("point[x=%d, y=%d] is out of "+this.toString(),
-            newX, newY,
-            this.x, this.y, this.width, this.height)
-            );
+            throw new IllegalArgumentException( String.format("point[x=%d, y=%d] is out of "+this.toString(), newX, newY) );
         }
     }
     public Supercell getAt( Point point ){
         return this.terrain.get( this.calculateIndex( point.getX(), point.getY()) );
+    }
+    public Supercell getAt( Vector vector ){
+        return this.terrain.get( this.calculateIndex( vector.getX(), vector.getY()) );
     }
     public Supercell getAt( double x, double y ){
         return this.terrain.get( this.calculateIndex( x, y ) );
@@ -212,7 +169,7 @@ public class World extends Rectangle implements Renderable, Associative, LoopInt
         }
     }
 
-    public void makeRegion( ArrayList<Supercell> supercells, RegionTemplateAccessibility traits ){     // I.M.S. 3 ()
+    public void makeRegion( ArrayList<Supercell> supercells, RegionTemplateAccessibility traits ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{     // I.M.S. 3 ()
         this.regions.add( new SuperRegion(supercells, traits) );
     }
 
@@ -230,15 +187,12 @@ public class World extends Rectangle implements Renderable, Associative, LoopInt
         System.out.format( "The world has been set to:%nwidth=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, worldInitWidth/Cell.WIDTH, worldInitHeight/Cell.WIDTH );
         Supercell newSuperCell;
 
-        this.time = System.nanoTime();
-
         /* Creates a single ArrayList of SuperCells; each row and column's cell is accessed with index arithmetic operations */
         for( int newY=0 ; newY<worldInitHeight ; newY+=Cell.WIDTH ){
             for( int newX=0 ; newX<worldInitWidth ; newX+=Cell.WIDTH ){
 
-                newSuperCell = new Supercell( anchor.x + newX, anchor.y + newY, traits.pickCellTemplateAccessibility( RandomSet.SET_TO_SPECIFIC_ODDS ) );
+                newSuperCell = new Supercell( (int) anchor.getX() + newX, (int) anchor.getY() + newY, traits.pickCellTemplateAccessibility( RandomSet.SET_TO_SPECIFIC_ODDS ) );
                 newSuperCell.adopt( this );
-                newSuperCell.anchorTo( this );
                 this.terrain.add( newSuperCell );
 
             }

@@ -1,4 +1,4 @@
-package World.api;
+package World.api.template;
 
 import java.awt.Image;
 

@@ -4,18 +4,23 @@ package World.model.statics;
 // ==== General ==== :
 import World.model.World;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 
 import Util.RandomSet;
 
 // ==== Interfaces ==== :
 import World.api.Associative;
-import World.api.RegionTemplateAccessibility;
+import World.api.template.RegionTemplateAccessibility;
 
 
 
-/*  Region instances operate as managers of Supercell instances. They designate "individual traits" from "holoistic" operations.
- *  Region instances are essentially sub-collections of Supercells within the main World instance. (they inherit Supercells, not create)
+/*  General Documentation:
+ *
+ *  Region instances are meant to be "holoistic" managers of collections of Supercell instances.
+ *  They ease the designation of "individual traits" and (might eventually intorduce) other sorts of functionalities.
+ *  Region instances ARE NOT in charge of "terrain" instantiation (at all); rather, all collections of "Supercells" are delegated and
+ *  Transformed from a "parent" World object.
  */
 public abstract class Region extends ArrayList<Supercell> implements Associative{ // Maybe implement an "AmbienceEmitter" interface later on
 
@@ -24,6 +29,8 @@ public abstract class Region extends ArrayList<Supercell> implements Associative
     // Instances:
     private ArrayList<Object> family = new ArrayList<>(0); /* Associative-functionality field */
     private RegionTemplateAccessibility traits;
+
+    public Rectangle container;
 
 
 
@@ -101,6 +108,43 @@ public abstract class Region extends ArrayList<Supercell> implements Associative
         );
     }
 
+    public Rectangle findContainer(){
+        /* Returns the smallest rectangle that contains this region: this shoudln't even be used but whatever */
+        int lowX = Integer.MAX_VALUE, lowY = Integer.MAX_VALUE, upX = Integer.MIN_VALUE, upY = Integer.MIN_VALUE;
+
+        for( Supercell i : this ){
+            lowX = i.x < lowX ? i.x : lowX;
+            lowY = i.y < lowY ? i.y : lowY;
+
+            upX = i.x > upX ? i.x : upX;
+            upY = i.y > upY ? i.y : upY;
+        }
+
+        return new Rectangle( lowX, lowY, upX + Cell.WIDTH, upY + Cell.WIDTH);
+    }
+
+    public Rectangle getContainer(){
+        return this.container;
+    }
+
+    // Concretes:
+
+    public static Rectangle findContainer( ArrayList<Supercell> supercells ){
+        /* Returns the smallest rectangle that contains this region */
+
+        int lowX = Integer.MAX_VALUE, lowY = Integer.MAX_VALUE, upX = Integer.MIN_VALUE, upY = Integer.MIN_VALUE;
+
+        for( Supercell i : supercells ){
+            lowX = i.x < lowX ? i.x : lowX;
+            lowY = i.y < lowY ? i.y : lowY;
+
+            upX = i.x > upX ? i.x : upX;
+            upY = i.y > upY ? i.y : upY;
+        }
+
+        return new Rectangle( lowX, lowY, upX + Cell.WIDTH, upY + Cell.WIDTH);
+    }
+
 
 
     // ==== Constructors ==== :
@@ -120,5 +164,7 @@ public abstract class Region extends ArrayList<Supercell> implements Associative
         else{
             throw new IllegalArgumentException("cannot construct a region without superCells");
         }
+
+        this.container = Region.findContainer(superCells);
     }
 }

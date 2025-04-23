@@ -2,14 +2,14 @@ package Math;
 
 import java.awt.Point;
 
-/*  Vectors... what else can I say? Designed as utility for dynamic-type objects?
+/*  Utility 
  */
 public class Vector {
 
     // ==== Fields ==== :
 
     // Instances:
-    private double[] projections;
+    private double[] projections = new double[2];
 
     // Concretes:
     public static final int X = 0, Y = 1;
@@ -63,6 +63,10 @@ public class Vector {
         this.projections[X] = x;
         this.projections[Y] = y;
     }
+    public void set( Vector vector ){
+        this.projections[X] = vector.getX();
+        this.projections[Y] = vector.getY();
+    }
 
     public Vector copy(){
         return new Vector( this.projections[X], this.projections[Y] );
@@ -74,6 +78,10 @@ public class Vector {
     }
     public Point toPoint(){
         return new Point( (int)(this.projections[X]), (int)(this.projections[Y]) );
+    }
+
+    public static Vector fromPointToVector( Point point ){
+        return new Vector( point.getX(), point.getY());
     }
 
 

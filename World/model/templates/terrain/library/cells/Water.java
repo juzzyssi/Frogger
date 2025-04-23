@@ -1,8 +1,8 @@
-package World.model.templates.library.cells;
+package World.model.templates.terrain.library.cells;
 
 import javax.swing.ImageIcon;
 
-import World.model.templates.CellTemplate;
+import World.model.templates.terrain.CellTemplate;
 
 public class Water extends CellTemplate{
 

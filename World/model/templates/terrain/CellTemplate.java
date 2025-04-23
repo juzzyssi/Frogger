@@ -1,16 +1,19 @@
 // ==== Package ==== :
-package World.model.templates;
+package World.model.templates.terrain;
 
 // ==== General ==== :
 import java.awt.Image;
 
-// ==== Interfaces ==== :
-import World.api.CellTemplateAccessibility;
+import World.api.template.CellTemplateAccessibility;
 
 
 
-/*  CellTemplate instances manage the visual and sonic properties of a Supercell instance. Each instance represents a single set of 
- *  "attributes" that are referrenced across the program, for efficiency reasons.
+/*  General Documentation:
+ *  
+ *  CellTemplate instances manage the visual and sonic properties of a Supercell instance.
+ *  Each instance represents a SINGLE set of "attributes" that are referrenced / called across the program (for efficiency reasons).
+ *  CellTemplate instances "share" the required fields through an interface (CellTemplateAccessibility) so that any extension of
+ *  CellTemplate remains compatible with Superell instances.
  */
 public abstract class CellTemplate implements CellTemplateAccessibility{
     
@@ -19,6 +22,7 @@ public abstract class CellTemplate implements CellTemplateAccessibility{
     // Instances:
     protected Image image;
 
+    /* Traversability required fields */
     public int identity;
     public boolean traversability;
     public int effect;
