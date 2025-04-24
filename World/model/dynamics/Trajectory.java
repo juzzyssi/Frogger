@@ -89,8 +89,8 @@ public class Trajectory implements LoopIntegration{
         this.internalTime = System.nanoTime();
 
         this.points = new ArrayList<>(2);
-        this.points.set(0, point1);
-        this.points.set(1, point2);
+        this.points.add(point1);
+        this.points.add(point2);
 
         // Initial setting:
 

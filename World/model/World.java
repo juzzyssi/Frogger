@@ -78,7 +78,12 @@ public class World extends Rectangle implements Renderable, LoopIntegration{
             );
         }
 
-        // ==== LooIntegrated Instances ==== : W.I.P.
+        // ==== LoopIntegrated Instances ==== :
+
+        /* This draws obstacles */
+        for( SuperRegion i : this.regions){
+            i.render( g, camera );
+        }
     }
 
     // LoopIntegration
@@ -170,6 +175,7 @@ public class World extends Rectangle implements Renderable, LoopIntegration{
     }
 
     public void makeRegion( ArrayList<Supercell> supercells, RegionTemplateAccessibility traits ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{     // I.M.S. 3 ()
+        
         this.regions.add( new SuperRegion(supercells, traits) );
     }
 

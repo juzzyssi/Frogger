@@ -28,7 +28,7 @@ public abstract class Region extends ArrayList<Supercell> implements Associative
 
     // Instances:
     private ArrayList<Object> family = new ArrayList<>(0); /* Associative-functionality field */
-    private RegionTemplateAccessibility traits;
+    protected RegionTemplateAccessibility traits;
 
     public Rectangle container;
 
@@ -151,10 +151,10 @@ public abstract class Region extends ArrayList<Supercell> implements Associative
 
     public Region( ArrayList<Supercell> superCells, RegionTemplateAccessibility traits ){
         super( superCells );
+        this.traits = traits;
 
         if( superCells.size() > 0 ){
             this.adopt( superCells.get(0).getFamilyMember( World.class ) );
-            this.traits = traits;
 
             for( Supercell i : this ){
                 i.adopt(this);

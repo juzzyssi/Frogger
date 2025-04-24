@@ -20,11 +20,18 @@ public class RandomSet<T> extends java.util.ArrayList<RandomObject<T>>{
     // Instances:
     public T getBaseObject(){                     // I.M.S. 0 ()
         if( !this.isEmpty() ){
+
+            if( !this.hasRandomBaseObject() ){
+                RandomSet.AssignRandomBaseObject( this );
+            }
+
             for( int i=0 ; i<this.size() ; i++ ){
                 if( this.get(i).isBaseObject() ){
                     return this.get(i).getObject();
                 }
             }
+            
+            /* Dead code (a base object is assigned even if there wasn't one) */
             throw new IllegalArgumentException(""+this.toString()+" has no \"baseObject\"");
         }
         else{
@@ -57,6 +64,15 @@ public class RandomSet<T> extends java.util.ArrayList<RandomObject<T>>{
         else{
             throw new IllegalArgumentException(""+this.toString()+" is empty");
         }
+    }
+    public boolean hasRandomBaseObject(){
+        boolean out = false;
+        for( RandomObject<T> i : this ){
+            if( !out && i.isBaseObject() ){
+                out = true;
+            }
+        }
+        return out;
     }
     @Override
     public String toString(){                                   // I.M.S. 1 ( generic utility )

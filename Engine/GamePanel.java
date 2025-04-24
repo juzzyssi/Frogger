@@ -33,7 +33,12 @@ public class GamePanel extends JPanel implements ActionListener {
     // ==== Interfaces ==== :
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        /* Updates the world */
+        this.level_1.checkIn( System.nanoTime() );
         this.repaint();
+        /* Sets the world ready for the next update */
+        this.level_1.checkOut( System.nanoTime() );
     }
     
 

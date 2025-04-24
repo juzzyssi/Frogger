@@ -20,5 +20,4 @@ public abstract class RegionalAtlas {
     public final static River RIVER = new River();
 
     public final static Highway HIGHWAY = new Highway();
-
 }

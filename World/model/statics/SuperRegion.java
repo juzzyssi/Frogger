@@ -11,11 +11,16 @@ import World.model.dynamics.Trajectory;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import Graphics.Camera;
+
+import java.awt.Graphics;
 import java.awt.Point;
 
 // ==== Interfaces ==== :
 import World.api.template.RegionTemplateAccessibility;
 import World.api.engine.LoopIntegration;
+import World.api.engine.Renderable;
 
 
 /*  General Documentation:
@@ -26,12 +31,11 @@ import World.api.engine.LoopIntegration;
  * 
  *  SuperRegion works as meta-Obstacle managers. (I believe it's called reflection)
  */
-public class SuperRegion extends Region implements LoopIntegration{
+public class SuperRegion extends Region implements LoopIntegration, Renderable{
 
     // ==== Fields ==== :
     
     // Instances:
-    RegionTemplateAccessibility traits;
     ArrayList<LoopIntegration> updatables;
     
     /* LoopIntegration-functionality fields */
@@ -61,6 +65,19 @@ public class SuperRegion extends Region implements LoopIntegration{
         }
     }
 
+    // Renderable:
+    public void render( Graphics g, Camera camera ){
+        /* This is only required to render obstacles, NOT Supercell instances */
+
+        for( LoopIntegration i : this.updatables ){
+
+            /*  This is a temporary fix: I have to iterate through this logic again; the good knews is that since all of the insatnces
+             *  are guaranteed Obstacle extensions, they must implement the render method.
+             */
+            ((Renderable) i).render( g, camera );
+        }
+    }
+
 
 
     // ==== Methods ==== :
@@ -85,6 +102,7 @@ public class SuperRegion extends Region implements LoopIntegration{
          * 
          *  Also using reflection: (neat concept ngl)
          */
+
         if( this.traits.getObstacleClasses().size() > 0 ){
             Class<? extends Obstacle> obsClazz;
             Constructor<? extends Obstacle> constructor;
