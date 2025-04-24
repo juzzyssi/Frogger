@@ -31,7 +31,6 @@ public class SuperRegion extends Region implements LoopIntegration{
     // ==== Fields ==== :
     
     // Instances:
-    RegionTemplateAccessibility traits;
     ArrayList<LoopIntegration> updatables;
     
     /* LoopIntegration-functionality fields */
@@ -85,6 +84,7 @@ public class SuperRegion extends Region implements LoopIntegration{
          * 
          *  Also using reflection: (neat concept ngl)
          */
+
         if( this.traits.getObstacleClasses().size() > 0 ){
             Class<? extends Obstacle> obsClazz;
             Constructor<? extends Obstacle> constructor;
