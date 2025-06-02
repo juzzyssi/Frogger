@@ -1,10 +1,9 @@
 // ==== Package ==== :
-package Model.model.templates.statics.cell;
+package Model.model.templates.statics.tile;
 
-// ==== Generals ==== :
-import Model.model.dynamics.primitives.Interactive;
+import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Cell;
+import Model.model.statics.primitives.Tile;
 
 import Util.random.RandomObject;
 import Util.random.RandomSet;
@@ -20,16 +19,15 @@ import Util.threads.IllegalOrderException;
 
 
 
-public class CleanRoad extends Cell{
-
+public class WaterCurrent extends Tile{
     // ==== Fields ==== :
 
     // Concretes:
-    public final static boolean TRAVERSABILITY = true;
+    public final static boolean TRAVERSABILITY = false;
     public static RandomSet<Image> IMAGES;
     static{
         SlimyGrass.IMAGES = new RandomSet<>( );
-        SlimyGrass.IMAGES.add( new RandomObject<Image>( Graphics.library.terrain.images.Atlas.ROAD1 , 0.7) );
+        SlimyGrass.IMAGES.add( new RandomObject<Image>( Graphics.library.terrain.images.Atlas.WATER1 , 0.7) );
     }
 
     // Instances:
@@ -44,15 +42,15 @@ public class CleanRoad extends Cell{
     }
 
     // Interactivity:
-    public String[] interact( Interactive object ) throws UnsupportedOperationException{
+    public String[][] interact( Toy object ) throws UnsupportedOperationException{
         return null;
     }
 
     // ==== Constructors ==== :
 
-    public CleanRoad( Terrain parent, Vector vector ) throws IllegalOrderException {
-        super( parent, vector, Cell.DEAFULT_ORDER, CleanRoad.TRAVERSABILITY );
+    public WaterCurrent( Terrain parent, Vector vector ) throws IllegalOrderException {
+        super( parent, vector, Tile.DEAFULT_ORDER, WaterCurrent.TRAVERSABILITY );
 
-        this.image = CleanRoad.IMAGES.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS );
+        this.image = WaterCurrent.IMAGES.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS );
     }
 }

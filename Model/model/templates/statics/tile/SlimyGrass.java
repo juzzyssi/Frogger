@@ -1,11 +1,9 @@
 // ==== Package ==== :
-package Model.model.templates.statics.cell;
+package Model.model.templates.statics.tile;
 
-// ==== Generals ==== :
-import Model.model.dynamics.primitives.Interactive;
+import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Cell;
-
+import Model.model.statics.primitives.Tile;
 import Util.random.RandomObject;
 import Util.random.RandomSet;
 
@@ -20,7 +18,7 @@ import Util.threads.IllegalOrderException;
 
 
 
-public class SlimyGrass extends Cell{
+public class SlimyGrass extends Tile{
 
     // ==== Fields ==== :
 
@@ -44,14 +42,15 @@ public class SlimyGrass extends Cell{
     }
 
     // Interactivity:
-    public String[] interact( Interactive object ) throws UnsupportedOperationException{
+    @Override
+    public String[][] interact( Toy object ) throws UnsupportedOperationException{
         return null;
     }
 
     // ==== Constructors ==== :
 
     public SlimyGrass( Terrain parent, Vector vector ) throws IllegalOrderException {
-        super( parent, vector, Cell.DEAFULT_ORDER, SlimyGrass.TRAVERSABILITY );
+        super( parent, vector, Tile.DEAFULT_ORDER, SlimyGrass.TRAVERSABILITY );
 
         this.image = SlimyGrass.IMAGES.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS );
     }

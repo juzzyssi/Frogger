@@ -3,7 +3,7 @@ package Model.model;
 
 // ==== Generals ==== :
 import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Cell;
+import Model.model.statics.primitives.Tile;
 import Model.model.statics.primitives.Region;
 
 import java.util.List;
@@ -12,14 +12,11 @@ import java.util.Set;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 
 import Util.Family;
 
-import java.lang.reflect.Constructor;
-
 import Graphics.Camera;
-
-import Math.Vector;
 
 // ==== Interfaces ==== :
 import Engine.api.management.*;
@@ -28,61 +25,59 @@ import Engine.api.management.*;
 import java.lang.reflect.InvocationTargetException;
 
 
-/*  Worlds are "god" classes that operate as both orchestrators and an interface between the game's "model" instances and the engine.
- *  World classes--for the most part--delegate "actions" to its "sub-components"
- * 
- */
+
 public class World{
 
-    // ==== Generic Conjugates ==== :
+    // ==== Generic Fields ==== :
 
-    //                                                          I.F.S. 0 (Instances | Association managing)
-    public Family family; /* Holds singular related instances: camera */
+    // *** Instances *** :
+    public Family family;
 
     // ==== Constructors ==== :
 
-    public World( Dimension dimension ){
+    public World( Dimension dimension, Class<? extends Region> clazz ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 
         /* API: */
         this.renderRg = new RenderRegistery();
         this.continuumRg = new ContinuumRegistery();
 
-        /* Dimensions are rounded to match a multiple of "Cell.WIDTH" */
-        int worldInitWidth = dimension.width - (dimension.width % Cell.BLOCK.width);
-        int worldInitHeight = dimension.height - (dimension.height % Cell.BLOCK.height);
-        System.out.format( "The World's terrain has been set to: width=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, this.terrain.getRows(), this.terrain.getColumns() );
+        /* Dimensions are rounded to match a multiple of "Tile.WIDTH" */
+        int worldInitWidth = dimension.width - (dimension.width % Tile.BLOCK.width);
+        int worldInitHeight = dimension.height - (dimension.height % Tile.BLOCK.height);
         
         /* Terrain: */
-        this.terrain = new Terrain( this.renderRg, this.continuumRg );
+        Rectangle plate = new Rectangle(0, 0, worldInitWidth, worldInitHeight);
+        this.terrain = new Terrain( this.renderRg, this.continuumRg, plate );
+        System.out.format( "The World's terrain has been set to: width=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, this.terrain.getRows(), this.terrain.getColumns() );
 
-        /* Sandbox: */
+        this.generateRegion(terrain.toSet(), clazz );
+
+        /* Sandbox: W.I.P. */
     }
 
 
 
     // ======================== API Functionality ========================:
 
-    /*  Note:
-     * 
-     *  This section aims covers matters related to a World's instance "application interface program" (API).
-     *  Particularly, adressing issues such as layers of "Renderable" instances threads, or how a "ContinuumIntegration" instance
-     *  interplays with other interfaces. 
-     */
+    // See: Engine > api > management > primitivess
 
     // ==== Fields ==== :
 
-    //                                                          I.F.S. 0 (Instances | API Managing)
+    // *** Instances *** :
+
+    // Apis:
     protected RenderRegistery renderRg;
     protected ContinuumRegistery continuumRg;
 
-    /* Integer keys are used as collections-processing-order specifiers to provide layering complexity */
-
+    // Continuum integration:
     private boolean updated = false;
     public long time = System.nanoTime();
 
-    // ==== Interfaces Execution ==== :
+    // ==== Interfaces ==== :
 
-    //                                                          I.M.S. 0 (Instances | Continuum Integration)
+    // *** Instances *** :
+
+    // Continuum integration:
     public void checkIn( long time, Graphics g, Camera camera ) throws Exception{
         if( !this.updated ){
             this.updated = true;
@@ -96,46 +91,42 @@ public class World{
     
     public void checkOut( long time ) throws Exception{
         if( this.updated ){
-            this.updated = false;
-
             this.continuumRg.checkIn( time );
             this.terrain.checkOut(time, null);
             
             this.continuumRg.executeRemovalQueue();
             this.renderRg.executeRemovalQueue();
+
+            this.updated = false;
         }
     }
 
     // ==== Methods ===== :
 
+    // ( I.M.S. 0 : generic auxiliaries )
     public RenderRegistery getRenderApi() {
         return this.renderRg;
+    }
+
+    public boolean isUpdated() {
+        return this.updated;
     }
 
 
     // ======================== Terrain Functionality ========================:
 
-    /*  Note:
-     * 
-     */
+    // See: Model > model > statics
 
     // ==== Fields ==== :
 
-    //                                                          I.F.S. 1 (Instances | Renderable Managing)
+    // *** Instances *** :
     protected Terrain terrain;
-
     public Map< Class<? extends Region>, List<? extends Region> > regions;
-
-    public final Vector anchor = new Vector(0 ,0);
-
-
 
     // ==== Methods ==== :
 
-    // Instances:
-
-    public void paint( Set<Cell> cells, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
-        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Set.class, Terrain.class );
-        constructor.newInstance( cells, this );
+    // *** Instances *** :
+    public void generateRegion( Set<Tile> tiles, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
+        this.terrain.paint(tiles, region);
     }
 }

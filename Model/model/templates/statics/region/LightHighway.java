@@ -1,12 +1,11 @@
 // ==== Package ==== :
 package Model.model.templates.statics.region;
 
-// ==== Generals ==== :
-import Model.model.dynamics.primitives.Interactive;
+import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Cell;
+import Model.model.statics.primitives.Tile;
 import Model.model.statics.primitives.Region;
-import Model.model.templates.statics.cell.CleanRoad;
+import Model.model.templates.statics.tile.CleanRoad;
 
 import java.rmi.NoSuchObjectException;
 import java.util.Set;
@@ -27,19 +26,19 @@ public class LightHighway extends Region{
 
     // ==== Fields ==== :
 
-    protected static RandomSet< Class<? extends Cell> > subCellLiterals;
-    protected static RandomSet< Class<? extends Interactive> > interactives;
+    protected static RandomSet< Class<? extends Tile> > subCellLiterals;
+    protected static RandomSet< Class<? extends Toy> > interactives;
     static{
-        /* Characteristic cells / "terrain": */
+        /* Characteristic tiles / "terrain": */
         LightHighway.subCellLiterals = new RandomSet<>();
-        LightHighway.subCellLiterals.add( new RandomObject<Class<? extends Cell>>( CleanRoad.class,  0.5) );
+        LightHighway.subCellLiterals.add( new RandomObject<Class<? extends Tile>>( CleanRoad.class,  0.5) );
 
         /* W.I.P. */
         LightHighway.interactives = null;
     }
 
     // ==== Constructors ==== :
-    public LightHighway( Set<Cell> cells, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
-        super( cells, terrain, LightHighway.subCellLiterals, LightHighway.interactives );
+    public LightHighway( Set<Tile> tiles, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
+        super( tiles, terrain, LightHighway.subCellLiterals, LightHighway.interactives );
     }
 }

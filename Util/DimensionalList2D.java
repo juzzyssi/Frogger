@@ -14,6 +14,7 @@ import java.util.List;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
+import Model.model.statics.Terrain;
 
 
 
@@ -26,7 +27,7 @@ public class DimensionalList2D<T>{
     public static final int X = 0, Y = 1;
 
     // Instances:
-    private List<T> elements;
+    private ArrayList<T> elements;
 
     private Rectangle plate;
     private Dimension block;
@@ -116,20 +117,19 @@ public class DimensionalList2D<T>{
         }
     }
 
-    private Vector snapToBlock( Vector vector ){
-        Vector projection = this.project( vector );
-        int dirX = projection.get( DimensionalList2D.X ) > 0 ? 1 : -1;
-        int dirY = projection.get( DimensionalList2D.Y ) > 0 ? 1 : -1;
-        
-        long x = projection.get( DimensionalList2D.X );
-        long y = projection.get( DimensionalList2D.Y );
+    private Vector snapToBlock(Vector vector) {
+        Vector p = project(vector);
+        long x = p.get( Terrain.X );
+        long y = p.get( Terrain.Y );
 
-        if( x % this.block.width != 0 ) {
-            x += dirX*( x % this.block.width );
-        } if ( y % this.block.height != 0 ) {
-            y += dirY*( y % this.block.height );
+        if (x % block.width != 0) {
+            long rx = x % block.width;
+            x += (x >= 0 ? block.width - rx : -rx);
         }
-
+        if (y % block.height != 0) {
+            long ry = y % block.height;
+            y += (y >= 0 ? block.height - ry : -ry);
+        }
         return new Vector(x, y);
     }
 
@@ -160,23 +160,29 @@ public class DimensionalList2D<T>{
 
     // I.M.S. 4 : Transformation.
 
-    private void horizontalExpansion( int blocks, int direction ) {
-        if( direction < 0 ){
-            for( int row = 0; row < this.getRows(); row++ ) {
-                for( int n = 0; n < blocks; n++ ){
-                    this.elements.add(row*( blocks + this.getColumns()), null );
-                }
+    private void horizontalExpansion(int blocks, int dir) {
+        int rows     = getRows();
+        int colsOld  = getColumns();
+        int colsNew  = colsOld + blocks;
+        this.elements.ensureCapacity(rows * colsNew);
+
+        if (dir < 0) {                 // expand left
+            for (int r = 0; r < rows; r++) {
+                int base = r * (colsOld + blocks);
+                for (int n = 0; n < blocks; n++) elements.add(base, null);
             }
-            this.plate.setBounds( this.plate.x - blocks*this.block.width, this.plate.y, this.plate.width + blocks*this.block.width, this.plate.height);
-        } else {
-            for( int row = 1; row <= this.getRows(); row++ ) {
-                for( int n = 0; n < blocks; n++ ){
-                    this.elements.add( row*(this.getColumns() + blocks) - blocks, null );
-                }
+            plate.setBounds(plate.x - blocks * block.width, plate.y,
+                            plate.width + blocks * block.width, plate.height);
+        } else {                       // expand right
+            for (int r = rows - 1; r >= 0; r--) {
+                int insertPos = (r + 1) * colsOld + r * blocks;
+                for (int n = 0; n < blocks; n++) elements.add(insertPos, null);
             }
-            this.plate.setBounds( this.plate.x, this.plate.y, this.plate.width + blocks*this.block.width, this.plate.height);
+            plate.setBounds(plate.x, plate.y,
+                            plate.width + blocks * block.width, plate.height);
         }
     }
+
 
     // re-work (reason; O( n*n ) which could be resolved if one could specifiy copy-positions ( O(n) ) )
     private void verticalExpansion( int blocks, int direction ) {

@@ -1,12 +1,11 @@
 // ==== Package ==== :
 package Model.model.templates.statics.region;
 
-// ==== Generals ==== :
-import Model.model.dynamics.primitives.Interactive;
+import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Cell;
+import Model.model.statics.primitives.Tile;
 import Model.model.statics.primitives.Region;
-import Model.model.templates.statics.cell.SlimyGrass;
+import Model.model.templates.statics.tile.SlimyGrass;
 
 import java.rmi.NoSuchObjectException;
 import java.util.Set;
@@ -29,19 +28,19 @@ public class LightForest extends Region{
 
     // ==== Fields ==== :
 
-    protected static RandomSet< Class<? extends Cell> > subCellLiterals;
-    protected static RandomSet< Class<? extends Interactive> > interactives;
+    protected static RandomSet< Class<? extends Tile> > subCellLiterals;
+    protected static RandomSet< Class<? extends Toy> > interactives;
     static{
-        /* Characteristic cells / "terrain": */
+        /* Characteristic tiles / "terrain": */
         LightForest.subCellLiterals = new RandomSet<>();
-        LightForest.subCellLiterals.add( new RandomObject<Class<? extends Cell>>( SlimyGrass.class,  0.5) );
+        LightForest.subCellLiterals.add( new RandomObject<Class<? extends Tile>>( SlimyGrass.class,  0.5) );
 
         /* W.I.P. */
         LightForest.interactives = null;
     }
 
     // ==== Constructors ==== :
-    public LightForest( Set<Cell> cells, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
-        super( cells, terrain, LightForest.subCellLiterals, LightForest.interactives );
+    public LightForest( Set<Tile> tiles, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
+        super( tiles, terrain, LightForest.subCellLiterals, LightForest.interactives );
     }
 }

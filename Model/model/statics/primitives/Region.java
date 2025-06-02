@@ -4,74 +4,86 @@ package Model.model.statics.primitives;
 // ==== General ==== :
 import java.awt.Rectangle;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
-import java.rmi.NoSuchObjectException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
-import Engine.api.management.exceptions.IllegalApiParameterException;
 import Math.Vector;
-import Model.exceptions.world.OutOfBoundsException;
-import Model.model.dynamics.primitives.Interactive;
+import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
 import Util.Family;
-import Util.TerrainAssociativeMutationException;
 import Util.random.RandomSet;
 
+// === Interfaces === :
+import java.util.Set;
+import java.util.Collection;
+
+// === Exceptions === :
+import java.lang.reflect.InvocationTargetException;
+import java.rmi.NoSuchObjectException;
+
+import Engine.api.management.exceptions.IllegalApiParameterException;
+
+import Model.exceptions.world.OutOfBoundsException;
+
+import Util.TerrainAssociativeMutationException;
 
 
-/*  General Documentation:
- *
- *  Region instances are meant to be "holoistic" managers of collections of Supercell instances.
- *  They ease the designation of "individual traits" and (might eventually intorduce) other sorts of functionalities.
- *  Region instances ARE NOT in charge of "terrain" instantiation (at all); rather, all collections of "Supercells" are delegated and
- *  Transformed from a "parent" World object.
- */
-public abstract class Region { // Maybe implement an "AmbienceEmitter" interface later on
+
+public abstract class Region {
 
     // ==== Fields ==== :
 
-    // Instances:
-    private Set<Cell> cells;
+    // *** Instances *** :
+    private Set<Tile> tiles;
+    
     private Family family;
     
     public Rectangle container;
 
-    // Concretes:
-    protected RandomSet< Class<? extends Cell> > subCellLiterals;
-    protected RandomSet< Class<? extends Interactive> > interactives;
+    // *** Concretes *** :
+    protected RandomSet< Class<? extends Tile> > subCellLiterals;
+    protected RandomSet< Class<? extends Toy> > toys;
 
     // ==== Methods ==== :
 
-    // Instances:                                                                                           // I.M.S. 0 ()
+    // *** Instances *** :
 
+    // ( I.M.S. 0 : getters & setters )
+
+    /*  Updates the region's container to contain all its current tiles: O( n )
+     */
     public void updateContainer(){
-        this.container.setBounds( Terrain.toRectangle( this.cells ) );
+        this.container.setBounds( Terrain.toRectangle( this.tiles ) );
     }
 
+    // O( 1 )
     public Rectangle getContainer(){
         return this.container;
     }
+
+    // O( 1 ) ( see: Util )
     public Family getFamily(){
         return this.family;
     }
 
-    public void remove( Cell cell ) {
-        this.cells.remove( cell );
+    // ( I.M.S. 1 : mutators )
+
+    // O( 1 )
+    public void remove( Tile tile ) {
+        this.tiles.remove( tile );
     }
 
+    /*  Mutates all the tile instances present at the given collection of vectors to match its own "sub-cell" sets: O( n )
+     */
     public void paint( Terrain terrain, Collection<Vector> vectors ) throws NoSuchMethodException, NoSuchObjectException, IllegalArgumentException, UnsupportedOperationException, OutOfBoundsException, IllegalApiParameterException, InstantiationException, IllegalAccessException, InvocationTargetException {
         /* Updating: */
         for( Vector vector : vectors ) {
 
-            Constructor<? extends Cell> constructor = this.subCellLiterals.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS ).getDeclaredConstructor( Terrain.class, Vector.class );                
+            Constructor<? extends Tile> constructor = this.subCellLiterals.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS ).getDeclaredConstructor( Terrain.class, Vector.class );                
             
-            Cell newSubCell = constructor.newInstance( terrain, vector );
-            Cell oldCell = terrain.setAt( vector, newSubCell );
+            Tile newSubCell = constructor.newInstance( terrain, vector );
+            Tile oldCell = terrain.setAt( vector, newSubCell );
                 
             if( oldCell != null ) {
                 Region parent = oldCell.getFamily().getFamilyMember( Region.class );
@@ -81,60 +93,42 @@ public abstract class Region { // Maybe implement an "AmbienceEmitter" interface
                     terrain.singRegionOut( parent );
                 }
             }
-            this.cells.add( newSubCell );
+            this.tiles.add( newSubCell );
         }
     }
 
+    // ( I.M.S. 2 : auxiliaries )
+
+    // O( 1 )
     public boolean isEmpty() {
-        return this.cells.isEmpty();
+        return this.tiles.isEmpty();
     }
 
-    public static Collection<Vector> toVectors( Collection<Cell> cells ) {
-        Collection<Vector> out = new ArrayList<>( cells.size() );
+    // *** Concretes *** :
 
-        for( Cell cell : cells ){
-            out.add( cell.toVector() );
+    // Returns a set of vectors that corresponds to the given set of tiles: O( n )
+    public static Collection<Vector> toVectors( Collection<Tile> tiles ) {
+        Collection<Vector> out = new ArrayList<>( tiles.size() );
+
+        for( Tile tile : tiles ){
+            out.add( tile.toVector() );
         }
 
         return out;
     }
 
-
-
     // ==== Constructors ==== :
 
-    public Region( Set<Cell> cells, Terrain terrain, RandomSet< Class<? extends Cell> > subCellLiterals, RandomSet< Class<? extends Interactive> > interactives ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
-        this.cells = new HashSet<>();
+    public Region( Set<Tile> tiles, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
+        this.tiles = new HashSet<>();
         this.family = new Family( this );
 
         this.subCellLiterals = subCellLiterals;
-        this.interactives = interactives;
+        this.toys = toys;
 
         this.family.adopt( terrain );
         terrain.singRegionUp( this );
 
-        this.paint( terrain, Region.toVectors( cells ) );
+        this.paint( terrain, Region.toVectors( tiles ) );
     }
-
-    /* if( !cells.isEmpty() ){
-
-            this.family = new Family( this );
-            this.family.adopt( ((Cell) cells.get(0)).getFamily().getFamilyMember( World.class ) );
-            
-            this.traits = traits;
-
-            RandomSet<Class<? extends Cell>> regionalCellClasses = this.traits.getCellClasses(modCount);
-            Vector cellVector = new Vector( 0, 0);
-            World parentWorld = this.family.getFamilyMember( World.class );
-            for( Traversable cell : cells ){
-
-                cellVector.set( ((Cell) cell).getAnchor() );
-                parentWorld.setAt( cellVector, regionalCellClasses.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS ), this );
-            }
-
-            this.container = Region.findContainer( this );
-        }
-        else{
-            throw new EmptyStackException();
-        } */
 }

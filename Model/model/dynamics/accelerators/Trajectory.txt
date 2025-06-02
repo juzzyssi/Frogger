@@ -1,18 +1,20 @@
+Just a copy-paste of the previous logic
+
 // ==== Package ==== :
-package Model.model.dynamics;
+package Model.model.dynamics.accelerators;
 
 // ==== General ==== :
 import java.awt.Point;
 
+import Engine.api.components.ContinuumIntegration;
 import Math.Vector;
-import Model.api.engine.LoopIntegration;
 
 
 
 /* Time is in nano-seconds, points must be arranged from first to last.
  * They were planned to make use of Bernstein pols, but another day... ig
  */
-public class Trajectory implements LoopIntegration{
+public class Trajectory implements ContinuumIntegration{
 
     // ==== Fields ==== :
 

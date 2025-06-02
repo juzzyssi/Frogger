@@ -4,6 +4,8 @@ package Model.model.statics;
 // ==== Generals ==== :
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import Graphics.Camera;
 
@@ -23,7 +25,7 @@ import java.util.Set;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
-import Model.model.statics.primitives.Cell;
+import Model.model.statics.primitives.Tile;
 import Model.model.statics.primitives.Region;
 import Engine.api.management.exceptions.IllegalApiParameterException;
 import Engine.api.management.primitives.ApiRegistery;
@@ -37,28 +39,27 @@ public class Terrain implements Renderable, ContinuumIntegration {
     // Concretes:
     public static final int X = 0, Y = 1;
 
-    // Instances:
+    // *** Instances *** :
 
-    /* Api components registery: */
+    // Api components registery: 
     private RenderRegistery renderApi;
     private ContinuumRegistery continuumApi;
 
     private Set<ApiRegistery<?>> apis;
 
-    /* Data: */
-    private DimensionalList2D<Cell> cells;
+    // Data:
+    private DimensionalList2D<Tile> tiles;
     private Set<Region> regions;
 
-    /* Rendering: */
-    private DimensionalList2D<Cell> oldFrame;
+    // Rendering:
+    private DimensionalList2D<Tile> oldFrame;
 
-    /* Continuum integration */
+    // Continuum integration:
     private boolean updated;
 
     // ==== Interfaces ==== :
 
     // Continuum integration:
-
     @Override
     public void checkIn( long time, Object... args ){
         if( !this.updated ) {
@@ -87,7 +88,6 @@ public class Terrain implements Renderable, ContinuumIntegration {
     }
 
     // Renderable:
-
     @Override
     public void render( Graphics g, Camera camera ){
         this.renderApi.render(g, camera);
@@ -95,100 +95,103 @@ public class Terrain implements Renderable, ContinuumIntegration {
 
     // ==== Methods ==== :
 
-    // Instances: 
+    // *** Instances *** : 
 
-    // I.M.S. 0 : "Getters & setters".
+    // ( I.M.S. 0 : getters & setters )
 
-    /*  Returns the "sub-Cell" instance at the given vector;
-     *  O( 1 ).
-     */
-    public Cell getAt( Vector vector ) throws OutOfBoundsException{
-        return this.cells.getAt( vector );
+    // Returns the tile present at such vector: O( 1 )
+    public Tile getAt( Vector vector ) throws OutOfBoundsException{
+        return this.tiles.getAt( vector );
     }
 
-    /*  Set's the "sub-Cell" instance at the specified vector;
-     *  O( 1 ).
-     */
-    public Cell setAt( Vector vector, Cell cell ) throws OutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, IllegalApiParameterException{
-        if( Cell.class.isInstance( cell ) ){
-            Object object = this.cells.getAt( vector );
+    // Sets the tile present at such vector: O( 1 )
+    public Tile setAt( Vector vector, Tile tile ) throws OutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, IllegalApiParameterException{
+        if( Tile.class.isInstance( tile ) ){
+            Object object = this.tiles.getAt( vector );
 
             if( object != null ){
-                Cell old = this.cells.getAt( vector );
+                Tile old = this.tiles.getAt( vector );
                 this.queueRemovalFromAllAPIs( old );
             }
-            this.adoptToAllAPIs( cell );
+            this.adoptToAllAPIs( tile );
 
-            return this.cells.setAt( vector, cell );
+            return this.tiles.setAt( vector, tile );
         } else {
-            throw new IllegalArgumentException( String.format("%s is not an instance of any %s sub-class", cell.toString(), Cell.class.getName()) );
+            throw new IllegalArgumentException( String.format("%s is not an instance of any %s sub-class", tile.toString(), Tile.class.getName()) );
         }
     }
 
+    // O( 1 )
     public int getColumns() {
-        return this.cells.getColumns();
+        return this.tiles.getColumns();
     }
     
+    // O( 1 )
     public int getRows() {
-        return this.cells.getRows();
+        return this.tiles.getRows();
     }
 
-    public Collection<Cell> getCells( Rectangle rectangle ) throws OutOfBoundsException {
-        return this.cells.subDimList2d(rectangle).toList();
+    // O( n ) (copy)
+    public Collection<Tile> getCells( Rectangle rectangle ) throws OutOfBoundsException {
+        return this.tiles.subDimList2d(rectangle).toList();
     }
 
-    // I.M.S. 1 : Api management.
+    // ( I.M.S. 1 : api management )
 
-    public void adoptToAllAPIs( Cell cell ) {
+    // Adds the tile to each valid api in the region: O( n ) / O( 1 )
+    public void adoptToAllAPIs( Tile tile ) {
         for( ApiRegistery<?> i : this.apis ) {
             try{
-                i.add( cell );
+                i.add( tile );
             } catch( IllegalApiParameterException e ) {
                 System.out.println( e.getMessage() );
             }
         }
     }
 
-    public void queueRemovalFromAllAPIs( Cell cell ) {
+    // "adoptToAllAPIs" opposite: O( n ) / O( 1 )
+    public void queueRemovalFromAllAPIs( Tile tile ) {
         for( ApiRegistery<?> i : this.apis ) {
             try{
-                i.queueRemoval( cell );
+                i.queueRemoval( tile );
             } catch( IllegalApiParameterException e ) {
                 System.out.println( e.getMessage() );
             }
         }
     }
     
+    // Executes the queue: O( n ) ( see: Engine > api > management > primitves )
     public void executeAPIRemovalQueue(){
         this.renderApi.executeRemovalQueue();
         this.continuumApi.executeRemovalQueue();
     }
 
-    // I.M.S. 2 : Process efficiency.
+    // ( I.M.S. 2 : others )
 
+    // Manages which cells are to be displayed by comparison with previous records: O( n )
     public void updateFrame( Camera camera ) throws OutOfBoundsException, IllegalApiParameterException {
         
-        if( this.cells.contains( camera.getRectangle() ) ){
+        if( this.tiles.contains( camera.getRectangle() ) ){
             if( this.oldFrame != null ){
-                DimensionalList2D<Cell> framedCells = this.cells.subDimList2d( camera.getRectangle() );
+                DimensionalList2D<Tile> framedCells = this.tiles.subDimList2d( camera.getRectangle() );
 
-                for( Cell cell : framedCells.toList() ) {
+                for( Tile tile : framedCells.toList() ) {
 
                     /* Recently visible: */
-                    if( !framedCells.contains( cell ) && !this.oldFrame.contains( cell ) ) {
-                        this.renderApi.add( cell );
+                    if( !framedCells.contains( tile ) && !this.oldFrame.contains( tile ) ) {
+                        this.renderApi.add( tile );
                     /* Recently hidden: */
-                    } else if( framedCells.contains( cell ) && !this.oldFrame.contains( cell ) ) {
-                        this.renderApi.queueRemoval( cell );
+                    } else if( framedCells.contains( tile ) && !this.oldFrame.contains( tile ) ) {
+                        this.renderApi.queueRemoval( tile );
                     }
                 }
                 
                 this.oldFrame = framedCells;
                 /* First frame: */
             } else {
-                this.oldFrame = this.cells.subDimList2d( camera.getRectangle() );
-                for( Object cell : this.oldFrame.toList() ) {
-                    this.renderApi.add( (Cell) cell );
+                this.oldFrame = this.tiles.subDimList2d( camera.getRectangle() );
+                for( Object tile : this.oldFrame.toList() ) {
+                    this.renderApi.add( (Tile) tile );
                 }
             }
         } else {
@@ -196,25 +199,42 @@ public class Terrain implements Renderable, ContinuumIntegration {
         }
     }
 
+    // O( 1 )
     public void singRegionUp( Region region ) {
         this.regions.add(region);
     }
+
+    // O( 1 )
     public void singRegionOut( Region region ) {
         this.regions.remove(region);
     }
 
-    // Concretes:
+    // ( I.M.S. 3 : Mutation )
 
-    // C.M.S. 0 : 
+    // (Optional approach) mutates a set of tiles to match a given region: O( n )
+    public void paint( Set<Tile> tiles, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
+        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Set.class, Terrain.class );
+        constructor.newInstance( tiles, this );
+    }
 
-    /*  Returns the smallest Rectangle that contains each cell of the specified Set;
-     *  O( n ) where n is the size of the Set.
+    // ( I.M.S. 4 : Auxiliaries )
+
+    // O( n )
+    public Set<Tile> toSet() {
+        return new HashSet<Tile>( this.tiles.toList() );
+    }
+
+    // *** Concretes *** :
+
+    // ( C.M.S. 0 : auxiliaries )
+
+    /*  Returns the smallest Rectangle that contains each tile of the specified Set: O( n )
      */
-    public static Rectangle toRectangle( Set<? extends Cell> cells ){
+    public static Rectangle toRectangle( Set<? extends Tile> tiles ){
         int lowX = Integer.MAX_VALUE, lowY = Integer.MAX_VALUE, upX = Integer.MIN_VALUE, upY = Integer.MIN_VALUE;
         Vector temp;
 
-        for( Cell i : cells ){
+        for( Tile i : tiles ){
             temp = i.toVector();
 
             lowX = temp.get( Terrain.X ) < lowX ? (int) temp.get( Terrain.X ) : lowX;
@@ -224,7 +244,7 @@ public class Terrain implements Renderable, ContinuumIntegration {
             upY = temp.get( Terrain.Y ) > upY ? (int) temp.get( Terrain.Y ) : upY;
         }
 
-        return new Rectangle( lowX, lowY, upX - lowX + Cell.BLOCK.width, upY - lowY + Cell.BLOCK.height);
+        return new Rectangle( lowX, lowY, upX - lowX + Tile.BLOCK.width, upY - lowY + Tile.BLOCK.height);
     }
 
     // ==== Constructors ==== :
@@ -238,7 +258,7 @@ public class Terrain implements Renderable, ContinuumIntegration {
         this.apis.add( this.renderApi );
         this.apis.add( this.continuumApi );
 
-        this.cells = new DimensionalList2D<>( Cell.BLOCK );
+        this.tiles = new DimensionalList2D<>( Tile.BLOCK );
     }
     public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg, Rectangle chunck ) {
         this.renderApi = renderRg;
@@ -249,6 +269,6 @@ public class Terrain implements Renderable, ContinuumIntegration {
         this.apis.add( this.renderApi );
         this.apis.add( this.continuumApi );
 
-        this.cells = new DimensionalList2D<>( Cell.BLOCK, chunck );
+        this.tiles = new DimensionalList2D<>( Tile.BLOCK, chunck );
     }
 }
