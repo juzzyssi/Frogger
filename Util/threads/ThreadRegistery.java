@@ -12,7 +12,7 @@ import java.util.Collection;
 
 
 
-public class ThreadRegistery<T> extends TreeMap</**/Integer,HashSet<T>/**/>{
+public class ThreadRegistery<T> extends TreeMap</**/Integer, HashSet<T>/**/>{
 
     // ==== Methods ==== :
 
@@ -21,7 +21,7 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer,HashSet<T>/**/>{
     //  I.M.S 0:
 
     /*  Fills the instance's LList gaps up to (and including) the specified order;
-     *  O(n) where n is the differnece between the new & current order limit (hopefully, as I'm assuming it balances on its own).
+     *  O(n) where n is the difference between the new & current order limit (hopefully, as I'm assuming it balances on its own).
      */
     private void addOrder( int order ){
         if( this.size() - 1 < order ){
@@ -46,20 +46,26 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer,HashSet<T>/**/>{
 
     //  I.M.S. 1: Collection's transformation
 
+    private void add( int order, T object ) {
+        if( !this.contains(order) ) {
+            this.addOrder( order );
+        }
+
+        this.get( order ).add(object);
+    }
+
     /*  Adds an object to the instance's "collection". If such object's order isn't present; the method calls "addOrder";
      *  O( Lg(n) ) if the order already exists within this isntance; otherwise O( n ) where n is the object's order (in both cases).
      */
     public void add( ThreadElement<T> object ) {
-        if( !this.contains( object.getOrder() )){
-            this.addOrder( object.getOrder() );
-        }
+        this.add( object.getOrder(), object.getObject() );
     }
     
     /*  Appends the collection of objects as internal data-elements of the instance;
      *  O( nLg(i) ) where n is the number of elements added to collection of size i.
      */
-    public void add( Collection<ThreadElement<T>> objects ){
-        for( ThreadElement<T> object: objects ){
+    public void add( Collection< ThreadElement<T> > objects ){
+        for( ThreadElement<T> object : objects ){
             this.add( object );
         }
     }
@@ -132,8 +138,5 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer,HashSet<T>/**/>{
 
     public ThreadRegistery(){
         super();
-    }
-    public ThreadRegistery( Collection<ThreadElement<T>> objects ){
-        super( ThreadRegistery.toThreadRegistery( objects ) );
     }
 }

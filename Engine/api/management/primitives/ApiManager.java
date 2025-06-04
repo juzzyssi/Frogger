@@ -55,8 +55,8 @@ public class ApiManager<T> {
 
         for( Integer order : clazzes.keySet() ) {
             for( Class<?> clazz : clazzes.get(order) ){
-                ThreadElement<?> thread = new ThreadElement<>( clazz.cast(parent), order);
-                this.storage.put(clazz, thread);
+                ThreadElement<?> thread = new ThreadElement<>( clazz.cast(parent), order );
+                this.storage.put( clazz, thread );
             }
         }
     }

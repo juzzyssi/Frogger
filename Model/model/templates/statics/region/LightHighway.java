@@ -8,14 +8,14 @@ import Model.model.statics.primitives.Region;
 import Model.model.templates.statics.tile.CleanRoad;
 
 import java.rmi.NoSuchObjectException;
-import java.util.Set;
+import java.util.Collection;
 
 import Util.random.RandomObject;
 import Util.random.RandomSet;
 
 // ==== Exceptions ==== :
 import Engine.api.management.exceptions.IllegalApiParameterException;
-
+import Math.Vector;
 import Util.TerrainAssociativeMutationException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +38,7 @@ public class LightHighway extends Region{
     }
 
     // ==== Constructors ==== :
-    public LightHighway( Set<Tile> tiles, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
-        super( tiles, terrain, LightHighway.subCellLiterals, LightHighway.interactives );
+    public LightHighway( Collection<Vector> vectors, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
+        super( vectors, terrain, LightHighway.subCellLiterals, LightHighway.interactives );
     }
 }

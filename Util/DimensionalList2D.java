@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 import Math.Vector;
 
@@ -14,7 +17,6 @@ import java.util.List;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
-import Model.model.statics.Terrain;
 
 
 
@@ -117,10 +119,10 @@ public class DimensionalList2D<T>{
         }
     }
 
-    private Vector snapToBlock(Vector vector) {
+    public Vector snapToBlock(Vector vector) {
         Vector p = project(vector);
-        long x = p.get( Terrain.X );
-        long y = p.get( Terrain.Y );
+        long x = p.get( DimensionalList2D.X );
+        long y = p.get( DimensionalList2D.Y );
 
         if (x % block.width != 0) {
             long rx = x % block.width;
@@ -156,8 +158,68 @@ public class DimensionalList2D<T>{
         } else {
             throw new OutOfBoundsException( String.format("%s exists outside of %s", rectangle.toString(), this.toString()) );
         }
-    }    
+    }
 
+    // O( n )
+    public Collection<Vector> toVectors() {
+        Collection<Vector> out = new HashSet<>();
+
+        for( long y = (long) this.plate.y; y < (long)( this.plate.y + this.plate.height); y+= (long) this.block.height ) {
+            for( long x = (long) this.plate.x; x < (long)( this.plate.x + this.plate.width); x+= (long) this.block.width ) {
+                out.add( new Vector(x, y) );
+            }
+        }
+
+        return out;
+    }
+
+    public Collection<T> getRowContent( int row ) throws OutOfBoundsException {
+        if( 0 <= row && row <= this.getRows() ) {
+            Collection<T> out = new LinkedList<>();
+
+            Vector i = new Vector( (long) this.plate.x, (long) (this.plate.y + row*this.block.height) );
+            for( long x = (long) this.plate.x; x < (long)( this.plate.x + this.plate.width ); x += (long) this.block.width ) {
+                i.set( DimensionalList2D.X, x );    
+                out.add( this.getAt( i ) );
+            }
+            return out;
+        } else {
+            throw new OutOfBoundsException( String.format( "%d doesn't belong to [ 0, %d ]", row, this.getRows()) );
+        }
+    }
+
+    public Collection<T> getColumnContent( int col ) throws OutOfBoundsException {
+        if( 0 <= col && col <= this.getColumns() ) {
+            Collection<T> out = new LinkedList<>();
+
+            Vector i = new Vector( (long) (this.plate.x + col*this.block.width), (long) this.plate.y );
+            for( long y = (long) this.plate.y; y < (long)( this.plate.y + this.plate.height ); y += (long) this.block.height ) {
+                i.set( DimensionalList2D.Y, y );    
+                out.add( this.getAt( i ) );
+            }
+            return out;
+        } else {
+            throw new OutOfBoundsException( String.format( "%d doesn't belong to [ 0, %d ]", col, this.getColumns()) );
+        }
+    }
+    
+    @Override
+    public String toString() {
+        String fString = "";
+
+        for( int row = 0; row < this.getRows(); row += 1 ) {
+            try{
+                for( T object : this.getRowContent(row) ) {
+                    fString += object.toString() + ", ";
+                }
+            } catch( OutOfBoundsException e ) {
+                // nothing
+            }
+            fString = fString.substring( 0, fString.length() - 2) + "%n";
+        }
+        return String.format( fString.substring( 0, fString.length() -2 ), null);
+    }
+    
     // I.M.S. 4 : Transformation.
 
     private void horizontalExpansion(int blocks, int dir) {
@@ -199,6 +261,7 @@ public class DimensionalList2D<T>{
         } 
     }
 
+    // W.I.P. O( n*n )
     public void extend( Vector vector ) {
         if( !this.plate.contains( vector.toPoint2D() ) ){
             Vector rounded = this.snapToBlock( vector );

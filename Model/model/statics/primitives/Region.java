@@ -5,7 +5,6 @@ package Model.model.statics.primitives;
 import java.awt.Rectangle;
 import java.lang.reflect.Constructor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import Math.Vector;
@@ -83,8 +82,14 @@ public abstract class Region {
             Constructor<? extends Tile> constructor = this.subCellLiterals.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS ).getDeclaredConstructor( Terrain.class, Vector.class );                
             
             Tile newSubCell = constructor.newInstance( terrain, vector );
-            Tile oldCell = terrain.setAt( vector, newSubCell );
-                
+            Tile oldCell = terrain.set( newSubCell );
+
+            try{
+                newSubCell.getFamily().adopt( (Region) this );
+            } catch( TerrainAssociativeMutationException e ) {
+                // Nothing
+            }
+            
             if( oldCell != null ) {
                 Region parent = oldCell.getFamily().getFamilyMember( Region.class );
                 parent.remove( oldCell );
@@ -104,22 +109,9 @@ public abstract class Region {
         return this.tiles.isEmpty();
     }
 
-    // *** Concretes *** :
-
-    // Returns a set of vectors that corresponds to the given set of tiles: O( n )
-    public static Collection<Vector> toVectors( Collection<Tile> tiles ) {
-        Collection<Vector> out = new ArrayList<>( tiles.size() );
-
-        for( Tile tile : tiles ){
-            out.add( tile.toVector() );
-        }
-
-        return out;
-    }
-
     // ==== Constructors ==== :
 
-    public Region( Set<Tile> tiles, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
+    public Region( Collection<Vector> vectors, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
         this.tiles = new HashSet<>();
         this.family = new Family( this );
 
@@ -129,6 +121,6 @@ public abstract class Region {
         this.family.adopt( terrain );
         terrain.singRegionUp( this );
 
-        this.paint( terrain, Region.toVectors( tiles ) );
+        this.paint( terrain, vectors );
     }
 }

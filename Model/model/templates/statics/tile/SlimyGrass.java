@@ -1,6 +1,7 @@
 // ==== Package ==== :
 package Model.model.templates.statics.tile;
 
+import Model.model.interactives.primitives.Token;
 import Model.model.interactives.primitives.Toy;
 import Model.model.statics.Terrain;
 import Model.model.statics.primitives.Tile;
@@ -38,12 +39,18 @@ public class SlimyGrass extends Tile{
     // Renderable:
     public void render( java.awt.Graphics g, Camera camera ) {
         Vector anchor = camera.getPosition();
-        g.drawImage( this.image, (int) (this.x - anchor.get( Terrain.X )) , (int) (this.y - anchor.get( Terrain.Y )), null);
+        g.drawImage(
+            this.image,
+            (int) (this.x - anchor.get( Terrain.X )) ,
+            (int) (this.y - anchor.get( Terrain.Y )),
+            Tile.BLOCK.width,
+            Tile.BLOCK.height,
+            null);
     }
 
     // Interactivity:
     @Override
-    public String[][] interact( Toy object ) throws UnsupportedOperationException{
+    public Token interact( Toy object ) throws UnsupportedOperationException{
         return null;
     }
 

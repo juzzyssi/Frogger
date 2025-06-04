@@ -10,6 +10,8 @@ import javax.swing.*;
 import Graphics.Camera;
 import Math.Vector;
 import Model.model.World;
+import Model.model.statics.primitives.Tile;
+import Model.model.templates.statics.region.CalmRiver;
 import Model.model.templates.statics.region.LightForest;
 
 
@@ -38,13 +40,17 @@ public class GRunner extends JPanel implements ActionListener {
         if( model.isUpdated() || this.start ) {
             this.start = false;
             try{
+                System.out.println( "1" );
                 this.model.checkIn( System.nanoTime(), this.getGraphics(), this.camera ) ;
+                System.out.println( "2" );
                 this.repaint();
 
+                System.out.println( "3" );
                 /* Sets the world ready for the next update */
                 this.model.checkOut( System.nanoTime() );
+                System.out.println( "4" );
             } catch( Exception i ) {
-                System.out.println( i.getMessage() );
+                System.out.println( i + ": " + i.getMessage() );
             }
         }
     }
@@ -72,6 +78,9 @@ public class GRunner extends JPanel implements ActionListener {
         // ==== Level 1 Set-up ==== :
         {
             this.model = new World( cameraDimensions, LightForest.class );
+            
+            Rectangle square = new Rectangle( Tile.BLOCK.width, Tile.BLOCK.height, 2*Tile.BLOCK.width, 2*Tile.BLOCK.height );
+            this.model.getTerrain().paint( this.model.getTerrain().getVectors( square ), CalmRiver.class );
         }
 
 

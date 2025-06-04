@@ -29,7 +29,7 @@ public abstract class ApiRegistery<T> extends ThreadRegistery<T> implements Regi
      *  O( Lg(n) ) where n is the size of the queue.
      */
     public void queueRemoval( ThreadElement<T> object ){
-        if( this.contains(object) && !removalQueue.contains(object) ){
+        if( this.contains(object) ){
             this.removalQueue.add(object);
         }
     }
@@ -68,6 +68,7 @@ public abstract class ApiRegistery<T> extends ThreadRegistery<T> implements Regi
     // ==== Constructors ==== :
 
     public ApiRegistery(){
+        super();
         this.removalQueue = new ThreadRegistery<>();
     }
 }

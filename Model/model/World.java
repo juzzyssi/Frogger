@@ -6,13 +6,12 @@ import Model.model.statics.Terrain;
 import Model.model.statics.primitives.Tile;
 import Model.model.statics.primitives.Region;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+
+import java.util.List;
+import java.util.Map;
 
 import Util.Family;
 
@@ -50,7 +49,7 @@ public class World{
         this.terrain = new Terrain( this.renderRg, this.continuumRg, plate );
         System.out.format( "The World's terrain has been set to: width=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, this.terrain.getRows(), this.terrain.getColumns() );
 
-        this.generateRegion(terrain.toSet(), clazz );
+        this.getTerrain().paint( terrain.toVectors(), clazz );
 
         /* Sandbox: W.I.P. */
     }
@@ -109,7 +108,7 @@ public class World{
     }
 
     public boolean isUpdated() {
-        return this.updated;
+        return !this.updated;
     }
 
 
@@ -126,7 +125,7 @@ public class World{
     // ==== Methods ==== :
 
     // *** Instances *** :
-    public void generateRegion( Set<Tile> tiles, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
-        this.terrain.paint(tiles, region);
+    public Terrain getTerrain() {
+        return this.terrain;
     }
 }

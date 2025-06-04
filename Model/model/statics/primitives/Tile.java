@@ -4,6 +4,7 @@ package Model.model.statics.primitives;
 // ==== General ==== :
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import Engine.api.management.ifaces.ApiBindable;
 import Engine.api.management.primitives.ApiManager;
 import Engine.api.components.Renderable;
 
-import Model.api.Traversable;
 import Model.model.interactives.api.Interactivity;
 import Model.model.statics.Terrain;
 
@@ -43,7 +43,6 @@ public abstract class Tile extends Rectangle implements Renderable, ApiBindable,
         
         ArrayList<Class<?>> order_0 = new ArrayList<>();
         order_0.add( Renderable.class );
-        order_0.add( Traversable.class );
 
         temp.put( 0, order_0 );
 
@@ -77,14 +76,6 @@ public abstract class Tile extends Rectangle implements Renderable, ApiBindable,
     public boolean isTraversable(){
         return this.traversable;
     }
-    
-    @Override
-    public String toString(){
-        return String.format("Tile[ x=%d, y=%d, width=%d, height=%d, family=%s ]",
-        this.x, this.y, this.width, this.height,
-        this.family.toString()
-        );
-    }
 
     // See: Math
     public Vector toVector(){
@@ -94,6 +85,24 @@ public abstract class Tile extends Rectangle implements Renderable, ApiBindable,
     // See: Util 
     public Family getFamily(){
         return this.family;
+    }
+
+    @Override
+    public String toString() {
+        return String.format( "Tile[ x=%d, y=%d, width=%d, height=%d ]", this.x, this.y, this.width, this.height );
+    }
+
+    // *** Concretes *** :
+
+    // Returns a set of vectors that corresponds to the given set of tiles: O( n )
+    public static Collection<Vector> toVectors( Collection<Tile> tiles ) {
+        Collection<Vector> out = new ArrayList<>( tiles.size() );
+
+        for( Tile tile : tiles ){
+            out.add( tile.toVector() );
+        }
+
+        return out;
     }
 
     // ==== Constructors ==== :

@@ -28,24 +28,38 @@ public class Family {
     // ==== Methods ==== :
 
     // Instances:
+    @SuppressWarnings("unchecked")
+    public <T> T getFamilyMember( Class<T> clazz ) throws NoSuchObjectException {
+        if( this.hasMember(clazz) ) {
+            for( Class<?> cl : this.family.keySet() ) {
+                if( clazz.isAssignableFrom( cl ) ) {
+                    return (T) this.family.get( cl );
+                }
+            }
+            throw new NoSuchObjectException( String.format("No object of class %s was found in %s's family",  clazz.getName(), this.directParent.toString()));
+        } else {
+            throw new NoSuchObjectException( String.format("No object of class %s was found in %s's family",  clazz.getName(), this.directParent.toString()));
+        }    
+    }
+
+    public boolean hasMember( Class<?> clazz ) {
+        for( Class<?> cl : this.family.keySet() ) {
+            if( clazz.isAssignableFrom( cl ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isFamily( Object object ){
         return this.family.containsValue( object );
     }
-    public <T> boolean hasMember( Class<T> clazz ){
-        return this.family.containsKey( clazz );
-    }
-    public <T> T getFamilyMember( Class<T> clazz ) throws NoSuchObjectException{
-        if( this.hasMember(clazz) ){
-            return clazz.cast( this.family.get(clazz) );
-        }
-        else{
-            throw new NoSuchObjectException( String.format("No object of class %s was found in %s's family",  clazz.getName(), this.directParent.toString()));
-        }
-    }
+
+    /* Adoption must happen through Classes that are intended as the root */
     public void adopt( Object object ) throws TerrainAssociativeMutationException{
         if( this.isFamily(object) ){
 
-            if( object.getClass() == World.class && this.family.containsKey( World.class )){
+            if( object.getClass() == World.class && this.family.containsKey( World.class ) ){
                 throw new TerrainAssociativeMutationException();
             }
             else{

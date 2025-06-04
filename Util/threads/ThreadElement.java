@@ -33,6 +33,11 @@ public class ThreadElement<T> { /* Auxiliary class */
         this.object = object;
     }
 
+    @Override
+    public String toString() {
+        return String.format( "ThreadElement[ order=%d, object=%s ]", this.order, this.object.toString() );
+    }
+
     // ==== Constructors ==== : 
     
     public ThreadElement( T object, int order ) throws IllegalOrderException{

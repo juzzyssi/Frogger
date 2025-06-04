@@ -84,6 +84,9 @@ public class Terrain implements Renderable, ContinuumIntegration {
         if( this.updated ) {
             this.updated = false;            
             this.continuumApi.checkOut(time, args);
+
+            this.continuumApi.executeRemovalQueue();
+            this.renderApi.executeRemovalQueue();
         }
     }
 
@@ -105,20 +108,19 @@ public class Terrain implements Renderable, ContinuumIntegration {
     }
 
     // Sets the tile present at such vector: O( 1 )
-    public Tile setAt( Vector vector, Tile tile ) throws OutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, IllegalApiParameterException{
-        if( Tile.class.isInstance( tile ) ){
-            Object object = this.tiles.getAt( vector );
+    public Tile set( Tile newTile ) throws OutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, IllegalApiParameterException{
+        
+        // Ensuring grid-snap:
+        Vector vector = this.tiles.snapToBlock( newTile.toVector() );
+        newTile.setLocation( (int) vector.get( Terrain.X ), (int) vector.get( Terrain.Y ) );
 
-            if( object != null ){
-                Tile old = this.tiles.getAt( vector );
-                this.queueRemovalFromAllAPIs( old );
-            }
-            this.adoptToAllAPIs( tile );
+        Tile oldTile = this.tiles.getAt( vector );
 
-            return this.tiles.setAt( vector, tile );
-        } else {
-            throw new IllegalArgumentException( String.format("%s is not an instance of any %s sub-class", tile.toString(), Tile.class.getName()) );
+        if( oldTile != null ){
+            this.queueRemovalFromAllAPIs( oldTile );
         }
+        this.adoptToAllAPIs( newTile );
+        return this.tiles.setAt( vector, newTile ); // Returns the previous tile
     }
 
     // O( 1 )
@@ -132,8 +134,18 @@ public class Terrain implements Renderable, ContinuumIntegration {
     }
 
     // O( n ) (copy)
-    public Collection<Tile> getCells( Rectangle rectangle ) throws OutOfBoundsException {
+    public Collection<Tile> getTiles( Rectangle rectangle ) throws OutOfBoundsException {
         return this.tiles.subDimList2d(rectangle).toList();
+    }
+
+    public Collection<Vector> getVectors( Rectangle rectangle ) throws OutOfBoundsException{
+        Collection<Vector> out = new HashSet<>();
+
+        for( Tile tile : this.getTiles( rectangle ) ) {
+            out.add( tile.toVector() );
+        }
+
+        return out;
     }
 
     // ( I.M.S. 1 : api management )
@@ -211,10 +223,10 @@ public class Terrain implements Renderable, ContinuumIntegration {
 
     // ( I.M.S. 3 : Mutation )
 
-    // (Optional approach) mutates a set of tiles to match a given region: O( n )
-    public void paint( Set<Tile> tiles, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
-        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Set.class, Terrain.class );
-        constructor.newInstance( tiles, this );
+    // Creates a new region of the provided sub-class: O( n )
+    public void paint( Collection<Vector> vectors, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
+        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Collection.class, Terrain.class );
+        constructor.newInstance( vectors, this );
     }
 
     // ( I.M.S. 4 : Auxiliaries )
@@ -247,6 +259,11 @@ public class Terrain implements Renderable, ContinuumIntegration {
         return new Rectangle( lowX, lowY, upX - lowX + Tile.BLOCK.width, upY - lowY + Tile.BLOCK.height);
     }
 
+    public Collection<Vector> toVectors() {
+        return this.tiles.toVectors();
+    }
+
+
     // ==== Constructors ==== :
 
     public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg ) {
@@ -257,7 +274,8 @@ public class Terrain implements Renderable, ContinuumIntegration {
         this.apis = new HashSet<>();
         this.apis.add( this.renderApi );
         this.apis.add( this.continuumApi );
-
+        
+        this.regions = new HashSet<>();
         this.tiles = new DimensionalList2D<>( Tile.BLOCK );
     }
     public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg, Rectangle chunck ) {
@@ -269,6 +287,7 @@ public class Terrain implements Renderable, ContinuumIntegration {
         this.apis.add( this.renderApi );
         this.apis.add( this.continuumApi );
 
+        this.regions = new HashSet<>();
         this.tiles = new DimensionalList2D<>( Tile.BLOCK, chunck );
     }
 }
