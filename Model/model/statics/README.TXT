@@ -1,16 +1,32 @@
 
 General documentation:
-    The building blocks of the model's "terrain" ( AKA "static primitives" ) deal with terrain grid-based processes through three layers: general management & specific functionality.
+    ( Sub classes: Model > model > templates > statics )
+
+    This package aims to address the functional infrastructure of the model's terrain logic from first principles.
 
 Tile:
-    Tiles are abstract instances that operate as enhanced rectangles with the following upgrades:
+    "Tile" is the abstract & primitive class that rules & spread common functionality across sub-tiles. Tiles enhance java.awt.rectangle's functionality
+    with the following upgrades:
         - Renderability: flexible support for visual implementations ( e.g. images, gifs ).
         - Interactivity: token provison for specified "interactions" ( see: Model > model > interactives ).
 
-    Tiles are the fundation of all terrain generation. However, because of their abstract properties; only sub-classes of Tile are directly involved in the terrain's generation ( see: World > model > templates > statics > cell ).
+    IMPORTANT: Sub-tiles must provide a constructor with the following declared paramters: SubTile(Terrain, Vector). By deafult, differing behavior may
+    trigger a "NoSuchMethodException" during the tile-instantiation process.
 
 Region:
-    Regions operate as abstract collections & manipulators of tiles & "toys" ( see: Model > model > interactives > primitives ) given a certain set of "grids" or "tiles".
+    ( Further documentation: Util > DimentionalList2D; Math > Vector )
+
+    Regions operate as VIRTUAL collectors & mutators of a "Terrain" object's tiles by providing extensible and customizable processes of instancing while
+    granting logic-consistency across the program.
+    
+    Often, vectors are the only suited method of parametrization across the programm; any form of further region parametrization is encouraged to exclusively
+    rely in vectors and vectors only (exceptions should be handled carefully).
+
+    Regions won't naturally generate "toys"; this behaviour must be overriden by subclasses individually.
+
+    IMPORTANT: Sub-regions must provide a constructor with the following declared paramters: SubRegion( Collection<Vector>, Terrain). By deafult, differing
+    behavior may trigger a "NoSuchMethodException" during the tile-instantiation process.
 
 Terrain:
-    W.I.P.
+    Terrain instances can be compared to an interface dedicated to the management of all tile instances; they are responsible for bridging external (e.g.
+    engine components) & internal functionality (static primitives).

@@ -28,6 +28,14 @@ public class Camera extends JPanel {
 
     // ==== Methods ==== :
     
+    /* CONCRETES: */
+
+    public static Vector getModelRenderVector( Vector object, Vector camera ) {
+        long x = object.get( 0 ) - camera.get( 0 );
+        long y = object.get( 1 ) - camera.get( 1 );
+        return new Vector( x, y );
+    }
+
     // Instances:
     @Override
     protected void paintComponent( Graphics g ){

@@ -23,7 +23,7 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer, HashSet<T>/**/>{
     /*  Fills the instance's LList gaps up to (and including) the specified order;
      *  O(n) where n is the difference between the new & current order limit (hopefully, as I'm assuming it balances on its own).
      */
-    private void addOrder( int order ){
+    private void add( int order ){
         if( this.size() - 1 < order ){
             for( int i = this.size(); i <= order ; i++ ){
                 this.put( i, new HashSet<>() );
@@ -31,27 +31,13 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer, HashSet<T>/**/>{
         }
     }
 
-    /*  Provides boolean confirmation of the instance's possesion over the specified object;
-     *  O( Lg(n) ) where n is object's "order" value.
-     */
-    public boolean contains( ThreadElement<T> object ){
-        if( object.getOrder() <= this.size() ){
-            return this.get( object.getOrder() ).contains( object.getObject() );
-        }
-        return false;
-    }
-    public boolean contains( int order ){
-        return 0 <= order && order < this.size();
-    }
-
     //  I.M.S. 1: Collection's transformation
 
     private void add( int order, T object ) {
-        if( !this.contains(order) ) {
-            this.addOrder( order );
+        if( !this.contains( order ) ) {
+            this.add( order );
         }
-
-        this.get( order ).add(object);
+        this.get( order ).add( object );
     }
 
     /*  Adds an object to the instance's "collection". If such object's order isn't present; the method calls "addOrder";
@@ -79,14 +65,6 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer, HashSet<T>/**/>{
         }
     }
 
-    /*  Removes a collection of unsorted ThreadElement instances of type T;
-     *  O( n )
-     */
-    public void remove( Collection<ThreadElement<T>> objects ){
-        ThreadRegistery<T> queue = ThreadRegistery.toThreadRegistery( objects );
-        this.remove( queue );
-    }
-
     /*  Removes a sorted collection of ThreadElement insatnces of type T;
      *  O( n )
      */
@@ -95,6 +73,27 @@ public class ThreadRegistery<T> extends TreeMap</**/Integer, HashSet<T>/**/>{
             this.get( order ).removeAll( objects.get( order ) );
         }
         this.clean();
+    }
+
+    /*  Removes a collection of unsorted ThreadElement instances of type T;
+     *  O( n )
+     */
+    public void remove( Collection<ThreadElement<T>> objects ){
+        ThreadRegistery<T> queue = ThreadRegistery.toThreadRegistery( objects );
+        this.remove( queue );
+    }
+
+    /*  Provides boolean confirmation of the instance's possesion over the specified object;
+     *  O( Lg(n) ) where n is object's "order" value.
+     */
+    public boolean contains( ThreadElement<T> object ) {
+        if( object.getOrder() < this.size() ) {
+            return this.get( object.getOrder() ).contains( object.getObject() );
+        }
+        return false;
+    }
+    public boolean contains( int order ){
+        return 0 <= order && order < this.size();
     }
 
     /*  Clears the current data from the instance;

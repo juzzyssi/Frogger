@@ -4,13 +4,9 @@ package Model.model.statics.primitives;
 // ==== General ==== :
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import Util.Family;
-import Util.threads.ThreadElement;
 
 import Math.Vector;
 
@@ -19,8 +15,14 @@ import Engine.api.management.ifaces.ApiBindable;
 import Engine.api.management.primitives.ApiManager;
 import Engine.api.components.Renderable;
 
-import Model.model.interactives.api.Interactivity;
+import Model.model.interactives.api.Interactive;
 import Model.model.statics.Terrain;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import Util.threads.ThreadElement;
 
 // ==== Exceptions ==== :
 import Util.TerrainAssociativeMutationException;
@@ -30,11 +32,13 @@ import Engine.api.management.exceptions.IllegalApiParameterException;
 
 
 
-public abstract class Tile extends Rectangle implements Renderable, ApiBindable, Interactivity{
+public abstract class Tile extends Rectangle implements Renderable, ApiBindable, Interactive{
+
+    // ======== General Functionality ======== :
 
     // ==== Fields ==== :
 
-    // *** Concretes *** :
+    /* CONCRETES: */
     public final static Dimension BLOCK = new Dimension(56, 56);
 
     protected static HashMap< Integer, List<Class<?>> > DEAFULT_ORDER;
@@ -49,52 +53,42 @@ public abstract class Tile extends Rectangle implements Renderable, ApiBindable,
         Tile.DEAFULT_ORDER = temp;
     }
 
-    // *** Instances *** :
+    /* INSTANCES: */
     private Family family;
-
-    // Api fields:
     protected ApiManager<Tile> manager;
-
-    // Traversability fields:
     protected boolean traversable;
 
     // ==== Interfaces ==== :
 
-    // Api bindable:
-    @Override
+    @Override /* Api bindable */
     public <T> ThreadElement<T> toThreadElementOf( Class<T> clazz ) throws IllegalApiParameterException{
         return this.manager.getAs( clazz );
     }
 
     // ==== Methods ==== :
 
-    // *** Instances *** :
-
-    // ( I.M.S. 0 : Generic auxiliaries )
-
-    //  All the following methods share a O( 1 ).
+    /* INSTANCES: */
     public boolean isTraversable(){
         return this.traversable;
-    }
+    }   // O( 1 )
 
-    // See: Math
     public Vector toVector(){
         return new Vector( (long) this.x, (long) this.y );
-    }
+    }   // O( n )
 
-    // See: Util 
     public Family getFamily(){
         return this.family;
-    }
+    }   // O( 1 )
 
     @Override
     public String toString() {
-        return String.format( "Tile[ x=%d, y=%d, width=%d, height=%d ]", this.x, this.y, this.width, this.height );
-    }
+        return String.format( "Tile[ x=%d, y=%d, width=%d, height=%d, class=%s ]", this.x, this.y, this.width, this.height,this.getClass().getName() );
+    }   // O( 1 )
 
-    // *** Concretes *** :
+    /* INSTANCES: */
 
-    // Returns a set of vectors that corresponds to the given set of tiles: O( n )
+    /*  Returns a set of correspondent vectors to each tile in the provided collection. 
+     */
     public static Collection<Vector> toVectors( Collection<Tile> tiles ) {
         Collection<Vector> out = new ArrayList<>( tiles.size() );
 
@@ -103,7 +97,7 @@ public abstract class Tile extends Rectangle implements Renderable, ApiBindable,
         }
 
         return out;
-    }
+    }   // O( n )
 
     // ==== Constructors ==== :
 

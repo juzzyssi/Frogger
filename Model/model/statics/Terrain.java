@@ -1,11 +1,19 @@
 // ==== Package ==== :
 package Model.model.statics;
 
+import java.awt.Dimension;
 // ==== Generals ==== :
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+
+import Engine.api.management.primitives.ApiRegistery;
+import Engine.api.management.ContinuumRegistery;
+import Engine.api.management.RenderRegistery;
+
+import Model.model.statics.primitives.Tile;
+import Model.model.statics.primitives.Region;
 
 import Graphics.Camera;
 
@@ -13,41 +21,33 @@ import Math.Vector;
 
 import Util.DimensionalList2D;
 
+import java.util.HashSet;
+
 // ==== Interfaces ==== :
-import Engine.api.components.ContinuumIntegration;
+import Engine.api.components.Continuous;
 import Engine.api.components.Renderable;
-import Engine.api.management.ContinuumRegistery;
-import Engine.api.management.RenderRegistery;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
-import Model.model.statics.primitives.Tile;
-import Model.model.statics.primitives.Region;
 import Engine.api.management.exceptions.IllegalApiParameterException;
-import Engine.api.management.primitives.ApiRegistery;
 
 
 
-public class Terrain implements Renderable, ContinuumIntegration {
+public class Terrain implements Renderable, Continuous {
 
     // ==== Fields ==== :
 
-    // Concretes:
+    /* CONCRETES: */
     public static final int X = 0, Y = 1;
 
-    // *** Instances *** :
-
-    // Api components registery: 
-    private RenderRegistery renderApi;
-    private ContinuumRegistery continuumApi;
-
+    /* INSTANCES: */
+    private RenderRegistery renderApi; // Shallow reference.
+    private ContinuumRegistery continuumApi; // Shallow reference.
     private Set<ApiRegistery<?>> apis;
 
-    // Data:
     private DimensionalList2D<Tile> tiles;
     private Set<Region> regions;
 
@@ -59,7 +59,7 @@ public class Terrain implements Renderable, ContinuumIntegration {
 
     // ==== Interfaces ==== :
 
-    // Continuum integration:
+    // Continuous:
     @Override
     public void checkIn( long time, Object... args ){
         if( !this.updated ) {
@@ -96,47 +96,40 @@ public class Terrain implements Renderable, ContinuumIntegration {
         this.renderApi.render(g, camera);
     }
 
+    // ======== General Functionality ======== :
+
     // ==== Methods ==== :
 
-    // *** Instances *** : 
-
-    // ( I.M.S. 0 : getters & setters )
-
-    // Returns the tile present at such vector: O( 1 )
+    /* INSTANCES: */
     public Tile getAt( Vector vector ) throws OutOfBoundsException{
         return this.tiles.getAt( vector );
-    }
+    }   // O( 1 )
 
-    // Sets the tile present at such vector: O( 1 )
-    public Tile set( Tile newTile ) throws OutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, IllegalApiParameterException{
+    public Tile set( Tile newTile ) throws OutOfBoundsException, IllegalArgumentException {
         
         // Ensuring grid-snap:
         Vector vector = this.tiles.snapToBlock( newTile.toVector() );
         newTile.setLocation( (int) vector.get( Terrain.X ), (int) vector.get( Terrain.Y ) );
 
-        Tile oldTile = this.tiles.getAt( vector );
-
+        Tile oldTile = this.tiles.setAt( vector, newTile );
         if( oldTile != null ){
             this.queueRemovalFromAllAPIs( oldTile );
         }
-        this.adoptToAllAPIs( newTile );
-        return this.tiles.setAt( vector, newTile ); // Returns the previous tile
-    }
+        
+        return oldTile; // Returns the previous tile
+    }   // O( 1 )
 
-    // O( 1 )
     public int getColumns() {
         return this.tiles.getColumns();
-    }
+    }   // O( 1 )
     
-    // O( 1 )
     public int getRows() {
         return this.tiles.getRows();
-    }
+    }   // O( 1 )
 
-    // O( n ) (copy)
     public Collection<Tile> getTiles( Rectangle rectangle ) throws OutOfBoundsException {
         return this.tiles.subDimList2d(rectangle).toList();
-    }
+    }   // O( n )
 
     public Collection<Vector> getVectors( Rectangle rectangle ) throws OutOfBoundsException{
         Collection<Vector> out = new HashSet<>();
@@ -146,11 +139,31 @@ public class Terrain implements Renderable, ContinuumIntegration {
         }
 
         return out;
-    }
+    }   // O( n )
 
-    // ( I.M.S. 1 : api management )
+    public boolean contains( Region region ) {
+        return this.regions.contains( region );
+    }   // O( 1 )
 
-    // Adds the tile to each valid api in the region: O( n ) / O( 1 )
+    public void singRegionUp( Region region ) {
+        this.regions.add(region);
+    }   // O( 1 )
+
+    public void singRegionOut( Region region ) {
+        this.regions.remove(region);
+    }   // O( 1 )
+
+    public Set<Tile> toSet() {
+        return new HashSet<Tile>( this.tiles.toList() );
+    }   // O( n )
+
+    public Collection<Vector> toVectors() {
+        return this.tiles.toVectors();
+    }   // O( n )
+
+    // ======== Api Management ======== :
+
+    /* INSTANCES: */
     public void adoptToAllAPIs( Tile tile ) {
         for( ApiRegistery<?> i : this.apis ) {
             try{
@@ -159,9 +172,8 @@ public class Terrain implements Renderable, ContinuumIntegration {
                 System.out.println( e.getMessage() );
             }
         }
-    }
+    }   // O( 1 )
 
-    // "adoptToAllAPIs" opposite: O( n ) / O( 1 )
     public void queueRemovalFromAllAPIs( Tile tile ) {
         for( ApiRegistery<?> i : this.apis ) {
             try{
@@ -170,77 +182,18 @@ public class Terrain implements Renderable, ContinuumIntegration {
                 System.out.println( e.getMessage() );
             }
         }
-    }
+    }   // O( 1 )
     
-    // Executes the queue: O( n ) ( see: Engine > api > management > primitves )
     public void executeAPIRemovalQueue(){
         this.renderApi.executeRemovalQueue();
         this.continuumApi.executeRemovalQueue();
-    }
+    }   // O( n )
 
-    // ( I.M.S. 2 : others )
+    // ======== Terrain Processes ======== :
 
-    // Manages which cells are to be displayed by comparison with previous records: O( n )
-    public void updateFrame( Camera camera ) throws OutOfBoundsException, IllegalApiParameterException {
-        
-        if( this.tiles.contains( camera.getRectangle() ) ){
-            if( this.oldFrame != null ){
-                DimensionalList2D<Tile> framedCells = this.tiles.subDimList2d( camera.getRectangle() );
+    /* CONCRETES: */
 
-                for( Tile tile : framedCells.toList() ) {
-
-                    /* Recently visible: */
-                    if( !framedCells.contains( tile ) && !this.oldFrame.contains( tile ) ) {
-                        this.renderApi.add( tile );
-                    /* Recently hidden: */
-                    } else if( framedCells.contains( tile ) && !this.oldFrame.contains( tile ) ) {
-                        this.renderApi.queueRemoval( tile );
-                    }
-                }
-                
-                this.oldFrame = framedCells;
-                /* First frame: */
-            } else {
-                this.oldFrame = this.tiles.subDimList2d( camera.getRectangle() );
-                for( Object tile : this.oldFrame.toList() ) {
-                    this.renderApi.add( (Tile) tile );
-                }
-            }
-        } else {
-            throw new OutOfBoundsException();
-        }
-    }
-
-    // O( 1 )
-    public void singRegionUp( Region region ) {
-        this.regions.add(region);
-    }
-
-    // O( 1 )
-    public void singRegionOut( Region region ) {
-        this.regions.remove(region);
-    }
-
-    // ( I.M.S. 3 : Mutation )
-
-    // Creates a new region of the provided sub-class: O( n )
-    public void paint( Collection<Vector> vectors, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
-        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Collection.class, Terrain.class );
-        constructor.newInstance( vectors, this );
-    }
-
-    // ( I.M.S. 4 : Auxiliaries )
-
-    // O( n )
-    public Set<Tile> toSet() {
-        return new HashSet<Tile>( this.tiles.toList() );
-    }
-
-    // *** Concretes *** :
-
-    // ( C.M.S. 0 : auxiliaries )
-
-    /*  Returns the smallest Rectangle that contains each tile of the specified Set: O( n )
+    /*  Returns the smallest rectangle containing all the provided tiles. 
      */
     public static Rectangle toRectangle( Set<? extends Tile> tiles ){
         int lowX = Integer.MAX_VALUE, lowY = Integer.MAX_VALUE, upX = Integer.MIN_VALUE, upY = Integer.MIN_VALUE;
@@ -257,27 +210,67 @@ public class Terrain implements Renderable, ContinuumIntegration {
         }
 
         return new Rectangle( lowX, lowY, upX - lowX + Tile.BLOCK.width, upY - lowY + Tile.BLOCK.height);
+    }   // O( n )
+
+    /* INSTANCES: */
+    
+    /* Manages which cells are to be displayed by comparison with previous records.
+     */
+    public void updateFrame( Camera camera ) throws OutOfBoundsException, IllegalApiParameterException {
+        DimensionalList2D<Tile> framedCells = tiles.subDimList2d( camera.getRectangle() );
+
+        if( this.tiles.contains( camera.getRectangle() ) ) {
+            if (this.oldFrame != null) {
+                /* 1: recently framed tiles */
+                for (Tile tile : framedCells.toList()) {
+                    if (!this.oldFrame.contains( tile )) {
+                        this.adoptToAllAPIs( tile );
+                    }
+                }
+                /* 2: recently unframed tiles */
+                for (Tile tile : this.oldFrame.toList()) {
+                    if (!framedCells.contains( tile )) {
+                        this.queueRemovalFromAllAPIs(tile);
+                    }
+                }
+            } else {
+                for (Tile tile : framedCells.toList()) {
+                    this.adoptToAllAPIs( tile );
+                }
+            }
+            this.oldFrame = framedCells;
+        }
+    }   // O( n )
+
+    /*  Creates a new region of the provided sub-class.
+     */
+    public void paint( Collection<Vector> vectors, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
+        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Collection.class, Terrain.class );
+        constructor.newInstance( vectors, this );
+    }   // O( n )
+
+    public double getWidth() {
+        return this.tiles.getWidth();
     }
 
-    public Collection<Vector> toVectors() {
-        return this.tiles.toVectors();
+    public double getHeight() {
+        return this.tiles.getHeight();
     }
 
+    public Vector getDisplacement() {
+        return this.tiles.getDisplacement();
+    }
+
+    public Dimension getBlock() {
+        return this.tiles.getBlock();
+    }
+
+    public Vector snapToGrid( Vector vector ) {
+        return this.tiles.snapToBlock( vector );
+    }
 
     // ==== Constructors ==== :
-
-    public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg ) {
-        this.renderApi = renderRg;
-        this.continuumApi = continuumRg;
-        this.updated = false;
-
-        this.apis = new HashSet<>();
-        this.apis.add( this.renderApi );
-        this.apis.add( this.continuumApi );
-        
-        this.regions = new HashSet<>();
-        this.tiles = new DimensionalList2D<>( Tile.BLOCK );
-    }
+    
     public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg, Rectangle chunck ) {
         this.renderApi = renderRg;
         this.continuumApi = continuumRg;

@@ -245,7 +245,6 @@ public class DimensionalList2D<T>{
         }
     }
 
-
     // re-work (reason; O( n*n ) which could be resolved if one could specifiy copy-positions ( O(n) ) )
     private void verticalExpansion( int blocks, int direction ) {
         if( direction >= 0 ) {
@@ -280,6 +279,22 @@ public class DimensionalList2D<T>{
             }
             this.verticalExpansion( Math.abs((int) (rounded.get( DimensionalList2D.Y ) / this.block.getHeight())) , dirY );
         }
+    }
+
+    public double getWidth() {
+        return this.plate.getWidth();
+    } 
+
+    public double getHeight() {
+        return this.plate.getHeight();
+    }
+
+    public Vector getDisplacement() {
+        return new Vector( (long) this.plate.x, (long) this.plate.y );
+    }
+
+    public Dimension getBlock() {
+        return new Dimension( this.block );
     }
 
     // ==== Constructors ==== :

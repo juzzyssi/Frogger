@@ -24,7 +24,7 @@ public class RenderRegistery extends ApiRegistery<Renderable> implements Rendera
      *  O( n*i ) where n is the total size of the registery and i the algorithm of each element.
      */
     @Override
-    public void render(Graphics g, Camera camera) {
+    public void render( Graphics g, Camera camera ) {
         for( Integer layer : this.keySet() ){
             for( Renderable object : this.get( layer ) ){
                 object.render(g, camera);
@@ -41,7 +41,8 @@ public class RenderRegistery extends ApiRegistery<Renderable> implements Rendera
 
     @Override
     public void add( ApiBindable object ) throws IllegalApiParameterException{
-        this.add( object.toThreadElementOf(Renderable.class) );
+        // System.out.println( object.toThreadElementOf( Renderable.class ).getObject() );
+        this.add( object.toThreadElementOf( Renderable.class ) );
     }
 
     @Override

@@ -33,55 +33,51 @@ public abstract class Region {
 
     // ==== Fields ==== :
 
-    // *** Instances *** :
-    private Set<Tile> tiles;
-    
-    private Family family;
-    
-    public Rectangle container;
-
-    // *** Concretes *** :
+    /* CONCRETES: */
     protected RandomSet< Class<? extends Tile> > subCellLiterals;
     protected RandomSet< Class<? extends Toy> > toys;
 
+    /* INSTANCES: */
+    private Set<Tile> tiles;
+    private Family family;    
+    public Rectangle container;
+
     // ==== Methods ==== :
 
-    // *** Instances *** :
+    /* INSTANCES: */
+    public Rectangle getContainer(){
+        return this.container;
+    }   // O( 1 )
 
-    // ( I.M.S. 0 : getters & setters )
+    public Family getFamily(){
+        return this.family;
+    }   // O( 1 )
 
-    /*  Updates the region's container to contain all its current tiles: O( n )
+    public boolean isEmpty() {
+        return this.tiles.isEmpty();
+    }   // O( 1 )
+
+    /*  Updates the region's container to contain all the current tiles.
      */
     public void updateContainer(){
         this.container.setBounds( Terrain.toRectangle( this.tiles ) );
-    }
+    }   // O( n )
 
-    // O( 1 )
-    public Rectangle getContainer(){
-        return this.container;
-    }
-
-    // O( 1 ) ( see: Util )
-    public Family getFamily(){
-        return this.family;
-    }
-
-    // ( I.M.S. 1 : mutators )
-
-    // O( 1 )
     public void remove( Tile tile ) {
         this.tiles.remove( tile );
-    }
+    }   // O( 1 )
 
-    /*  Mutates all the tile instances present at the given collection of vectors to match its own "sub-cell" sets: O( n )
+    /*  Mutates all the tile instances present at the given collection of vectors to match its own "sub-cell" sets. ()
      */
     public void paint( Terrain terrain, Collection<Vector> vectors ) throws NoSuchMethodException, NoSuchObjectException, IllegalArgumentException, UnsupportedOperationException, OutOfBoundsException, IllegalApiParameterException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        /* Updating: */
+        
+        /* Terrain generation: */
         for( Vector vector : vectors ) {
 
+            /* New-tile */
             Constructor<? extends Tile> constructor = this.subCellLiterals.pickRandom( RandomSet.SET_TO_SPECIFIC_ODDS ).getDeclaredConstructor( Terrain.class, Vector.class );                
-            
             Tile newSubCell = constructor.newInstance( terrain, vector );
+
             Tile oldCell = terrain.set( newSubCell );
 
             try{
@@ -90,6 +86,7 @@ public abstract class Region {
                 // Nothing
             }
             
+            // Clears the old Tile & erases the parent region if empty.
             if( oldCell != null ) {
                 Region parent = oldCell.getFamily().getFamilyMember( Region.class );
                 parent.remove( oldCell );
@@ -98,15 +95,20 @@ public abstract class Region {
                     terrain.singRegionOut( parent );
                 }
             }
+
+            // Congruency:
+            if( !terrain.contains( this ) ) {
+                terrain.singRegionUp( (Region) this );
+            }
+
+            try{
+                this.getFamily().adopt( terrain );
+            } catch( TerrainAssociativeMutationException e ) {
+                // Nothing
+            }
+
             this.tiles.add( newSubCell );
         }
-    }
-
-    // ( I.M.S. 2 : auxiliaries )
-
-    // O( 1 )
-    public boolean isEmpty() {
-        return this.tiles.isEmpty();
     }
 
     // ==== Constructors ==== :

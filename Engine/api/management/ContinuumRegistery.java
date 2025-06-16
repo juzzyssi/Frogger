@@ -5,11 +5,11 @@ import Engine.api.management.exceptions.IllegalApiParameterException;
 import Engine.api.management.ifaces.ApiBindable;
 // ==== Interfaces ==== :
 import Engine.api.management.primitives.ApiRegistery;
-import Engine.api.components.ContinuumIntegration;
+import Engine.api.components.Continuous;
 
 
 
-public class ContinuumRegistery extends ApiRegistery<ContinuumIntegration> implements ContinuumIntegration{
+public class ContinuumRegistery extends ApiRegistery<Continuous> implements Continuous{
 
     // ==== Fields ==== :
 
@@ -22,7 +22,7 @@ public class ContinuumRegistery extends ApiRegistery<ContinuumIntegration> imple
     public void checkIn(long time, Object... args) {
         if( !this.updated ){
             for( Integer layer : this.keySet() ){
-                for( ContinuumIntegration object : this.get( layer ) ){
+                for( Continuous object : this.get( layer ) ){
                     object.checkIn( time, args );
                 }
             }
@@ -34,7 +34,7 @@ public class ContinuumRegistery extends ApiRegistery<ContinuumIntegration> imple
     public void checkOut(long time, Object... args) {
         if( this.updated ){
             for( Integer layer : this.keySet() ){
-                for( ContinuumIntegration object : this.get( layer ) ){
+                for( Continuous object : this.get( layer ) ){
                     object.checkOut( time, args );
                 }
             }
@@ -46,17 +46,17 @@ public class ContinuumRegistery extends ApiRegistery<ContinuumIntegration> imple
 
     @Override
     public boolean contains( ApiBindable object ) throws IllegalApiParameterException {
-        return this.contains( object.toThreadElementOf( ContinuumIntegration.class ) );
+        return this.contains( object.toThreadElementOf( Continuous.class ) );
     }
 
     @Override
     public void add( ApiBindable object ) throws IllegalApiParameterException {
-        this.add( object.toThreadElementOf(ContinuumIntegration.class) );
+        this.add( object.toThreadElementOf(Continuous.class) );
     }
 
     @Override
     public void queueRemoval( ApiBindable object ) throws IllegalApiParameterException {
-        this.queueRemoval( object.toThreadElementOf( ContinuumIntegration.class ) ); 
+        this.queueRemoval( object.toThreadElementOf( Continuous.class ) ); 
     }
 
 

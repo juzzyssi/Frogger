@@ -4,6 +4,8 @@ package Math;
 // ==== Generals ==== :
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 
 
@@ -41,6 +43,25 @@ public class Vector {
         return out;
     }
 
+    public static boolean areCongruent( Vector... vectors ) {
+        return Vector.areCongruent( Arrays.asList(vectors) );
+    }
+
+    public static boolean areCongruent( Collection<Vector> vectors ) {
+        int s = -1;
+
+        for( Vector vector : vectors ) {
+            if( s == -1 ) {
+                s = vector.size();
+            } else {
+                if( s != vector.size() ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     // Instances:
 
     // I.M.S. 0 : "getters & setters".
@@ -54,7 +75,7 @@ public class Vector {
         for( long comp : this.projections ) {
             sum += comp*comp;
         }
-        return Math.sqrt(sum);
+        return (long) Math.sqrt(sum);
     }
 
     public long get( int dimension ) throws NullPointerException{
@@ -149,6 +170,17 @@ public class Vector {
             String cause = "\"" + this.toString() + "\" cannot have less than two dimensions";
             throw new IllegalArgumentException( cause );
         }
+    }
+
+    public Vector getUnitVector() {
+        Vector out = new Vector( this.size() );
+
+        double abs = this.getAbs();
+        if( !(-0.00005 < abs && abs < 0.00005) ) {
+            out = this.scale( 1 / abs );
+        }
+
+        return out;
     }
 
     // ==== Constructors ==== :

@@ -6,7 +6,7 @@ package Engine.api.components;
 
 /*  LoopIntegration instances handle functionality, integrated with the game's loop. The thread safety must be manually moderated. 
  */
-public interface ContinuumIntegration{
+public interface Continuous{
 
     // ==== Methods ==== :
 

@@ -1,24 +1,28 @@
 // ==== Package ==== :
 package Model.model;
 
+import Model.model.interactives.primitives.SandBox;
 // ==== Generals ==== :
 import Model.model.statics.Terrain;
 import Model.model.statics.primitives.Tile;
+import Model.model.templates.interactives.entities.PFrog;
 import Model.model.statics.primitives.Region;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.LinkedList;
 
-import java.util.List;
-import java.util.Map;
-
-import Util.Family;
-
+import Util.threads.IllegalOrderException;
 import Graphics.Camera;
+import Math.Vector;
 
 // ==== Interfaces ==== :
 import Engine.api.management.*;
+import Engine.user.User;
+
+import java.util.List;
+import java.util.Map;
 
 // ==== Exceptions ==== :
 import java.lang.reflect.InvocationTargetException;
@@ -29,42 +33,54 @@ public class World{
 
     // ==== Generic Fields ==== :
 
-    // *** Instances *** :
-    public Family family;
+    /* INSTANCES: */
+    private User user;
+
+    public PFrog pFrog;
 
     // ==== Constructors ==== :
 
-    public World( Dimension dimension, Class<? extends Region> clazz ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+    public World( User user, Dimension dimension, Class<? extends Region> clazz ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IllegalOrderException{
 
         /* API: */
         this.renderRg = new RenderRegistery();
         this.continuumRg = new ContinuumRegistery();
 
-        /* Dimensions are rounded to match a multiple of "Tile.WIDTH" */
+
+        /* TERRAIN: */
         int worldInitWidth = dimension.width - (dimension.width % Tile.BLOCK.width);
         int worldInitHeight = dimension.height - (dimension.height % Tile.BLOCK.height);
         
-        /* Terrain: */
         Rectangle plate = new Rectangle(0, 0, worldInitWidth, worldInitHeight);
         this.terrain = new Terrain( this.renderRg, this.continuumRg, plate );
         System.out.format( "The World's terrain has been set to: width=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, this.terrain.getRows(), this.terrain.getColumns() );
 
         this.getTerrain().paint( terrain.toVectors(), clazz );
 
-        /* Sandbox: W.I.P. */
+        // setting up the spawn:
+        this.spawns = new LinkedList<>();
+        Vector terrainVector = this.terrain.getDisplacement();
+        Dimension terrainBlock = this.terrain.getBlock();
+        this.spawns.add( Vector.add( this.terrain.getDisplacement(), this.terrain.snapToGrid( new Vector( (long) (this.terrain.getWidth() / 2) + terrainVector.get( 0 ), (long) (this.terrain.getHeight() - terrainBlock.getHeight()) + terrainVector.get( 1 ) ) ) ) );
+
+
+        /* SANDBOX: */
+        this.sandbox = new SandBox( this.continuumRg, this.renderRg );
+
+
+        /* GENERALS: */
+        this.user = user;
+        this.pFrog = new PFrog( this.user, this.spawns.getFirst() );
+        this.sandbox.add( this.pFrog );
     }
 
 
 
     // ======================== API Functionality ========================:
 
-    // See: Engine > api > management > primitivess
-
     // ==== Fields ==== :
 
-    // *** Instances *** :
-
-    // Apis:
+    /* INSTANCES: */
     protected RenderRegistery renderRg;
     protected ContinuumRegistery continuumRg;
 
@@ -74,17 +90,16 @@ public class World{
 
     // ==== Interfaces ==== :
 
-    // *** Instances *** :
+    /* INSTANCES: */
 
     // Continuum integration:
-    public void checkIn( long time, Graphics g, Camera camera ) throws Exception{
+    public void checkIn( long time, Camera camera ) throws Exception{
         if( !this.updated ){
             this.updated = true;
 
             this.continuumRg.checkIn( time );
-            this.terrain.checkIn(time, camera);
-
-            this.renderRg.render( g, camera );
+            this.terrain.checkIn( time, camera );
+            this.sandbox.checkIn( time, this.sandbox );
         }
     }
     
@@ -92,6 +107,7 @@ public class World{
         if( this.updated ){
             this.continuumRg.checkIn( time );
             this.terrain.checkOut(time, null);
+            this.sandbox.checkOut(time, null);
             
             this.continuumRg.executeRemovalQueue();
             this.renderRg.executeRemovalQueue();
@@ -100,9 +116,14 @@ public class World{
         }
     }
 
+    // Renderable:
+    public void render( Graphics g, Camera camera ) {
+        this.renderRg.render(g, camera);
+    }
+
     // ==== Methods ===== :
 
-    // ( I.M.S. 0 : generic auxiliaries )
+    /* INSTANCES: */
     public RenderRegistery getRenderApi() {
         return this.renderRg;
     }
@@ -112,20 +133,38 @@ public class World{
     }
 
 
-    // ======================== Terrain Functionality ========================:
 
-    // See: Model > model > statics
+    // ======================== Terrain ========================:
 
     // ==== Fields ==== :
 
-    // *** Instances *** :
+    /* INSTANCES: */
+    private LinkedList<Vector> spawns;
+
     protected Terrain terrain;
+
     public Map< Class<? extends Region>, List<? extends Region> > regions;
 
     // ==== Methods ==== :
 
-    // *** Instances *** :
+    /* INSTANCES: */
     public Terrain getTerrain() {
         return this.terrain;
+    }
+
+
+
+    // ======================== Sandbox ========================:
+
+    // ==== Fields ==== :
+
+    /* INSTANCES: */
+    private SandBox sandbox;
+
+    // ==== Methods ==== :
+    
+    /* INSTANCES: */
+    public SandBox getSandBox() {
+        return this.sandbox;
     }
 }

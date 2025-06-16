@@ -1,13 +1,17 @@
+// ==== Package ==== :
 package Math;
 
-import java.awt.Point;
-import java.util.ArrayList;
+// ==== Generals ==== :
+import java.util.List;
 
-/*
- *  Cuvers (bezier curves): you could compose with a field a sub-instance list of the same class from which to store decomposed curves
- *  such that any call to eh overall time is only divided across this guys.
- */
+
+
 public class Curves{
+
+    // ==== Fields ==== :
+
+    // *** Concretes *** :
+    public static final double ARC_LENGTH_DT = 0.05;
 
     // ==== Methods ==== :
 
@@ -18,32 +22,47 @@ public class Curves{
     public static int binomialCoefficient( int n, int k ){
         return factorial(n) / ( factorial(n) * factorial( n - k ) );
     }
-    public static double bernsteinPolynomial( double[] doubles, double time ){
-        if( 0 <= time && time <= 1 ){
-            double out = 0;
-            int n = doubles.length;
 
-            for( int k = 0 ; k <= n ; k++ ){
-                out += (double) binomialCoefficient(n, k) * ( Math.pow( time, (double) k )* Math.pow(1.0 - time, (double)(n - k) ) );
+    public static Vector bezierCurve( List<Vector> vectors, double time ) throws IllegalArgumentException{
+        if( vectors.size() > 1 && Vector.areCongruent( vectors ) ) {
+            time = time > 1.0 ? 1.0 : time < 0.0 ? 0.0 : time;
+
+            if( vectors.size() == 2 ) {
+
+                Vector dVector = Vector.add( vectors.get(1), vectors.get(0).flip() );
+                return Vector.add( vectors.get(0), dVector.scale( time ) );
+            
+            } else {            
+                int n = vectors.size() - 1;
+                Vector temp = new Vector( vectors.get(0).size() ), out = new Vector( vectors.get(0).size() );
+
+                for( int k = 0 ; k <= n ; k++ ){
+                    for( int u = 0; u < n + 1; u++ ) {
+                        temp.set( u, 
+                            vectors.get( k ).get( u ) * (long) ( (double) binomialCoefficient(n, k) * ( Math.pow(time, (double) k) * Math.pow(1.0 - time, (double)(n - k) ) ) )
+                        );                    
+                    }
+                    out = Vector.add( out, temp );
+                }
+
+                return out;
             }
-            return out;
-        }
-        else{
-            throw new IllegalArgumentException("time must be an element of [0, 1]");
+        } else {
+            throw new IllegalArgumentException( "The collection of vectors isn't congruent" );
         }
     }
-    public static Point bezierCurve( ArrayList<Point> points, double time ){
-        double[] x = new double[ points.size() ];
-        double[] y = new double[ points.size() ];
 
-        for( int i = 0 ; i < points.size() ; i++ ){
-            x[i] = points.get(i).getX();
-            y[i] = points.get(i).getY();
+    public static long getArcLengthEstimate( List<Vector> vectors, double dt ) throws IllegalArgumentException {
+        if( 0.0 <= dt && dt <= 1.0 ) {
+            long l = 0;
+
+            for( double it = 0.0; it <= 1.0 - dt; it += dt ) {
+                l += Vector.add( Curves.bezierCurve(vectors, it + dt), Curves.bezierCurve(vectors, it).flip() ).getAbs();
+            }
+
+            return l;
+        } else {
+            throw new IllegalArgumentException( "dt must exists within the interval [1, 0]");
         }
-        
-        return new Point(
-            (int) bernsteinPolynomial( x, time),
-            (int) bernsteinPolynomial( y, time)
-        );
     }
 }
