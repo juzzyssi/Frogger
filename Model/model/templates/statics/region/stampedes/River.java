@@ -1,10 +1,11 @@
 // ==== Package ==== :
 package Model.model.templates.statics.region.stampedes;
 
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
-import Model.model.templates.interactives.subcategories.Vehicle;
-import Model.model.templates.statics.region.subcategories.Stampede;
+import Model.model.primitives.interactives.SandBox;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
+import Model.model.subprimitives.interactives.Vehicle;
+import Model.model.subprimitives.statics.region.Stampede;
 import Model.model.templates.statics.tile.abyss.Water;
 
 import java.rmi.NoSuchObjectException;
@@ -25,8 +26,8 @@ import Model.exceptions.world.OutOfBoundsException;
 public abstract class River extends Stampede {
 
     // ==== Constructors ==== :
-    public River( Collection<Vector> vectors, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Vehicle> > vehicles ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
-        super( vectors, terrain, subCellLiterals, vehicles );
+    public River( Collection<Vector> vectors, SandBox sandbox, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Vehicle> > vehicles ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
+        super( vectors, sandbox, terrain, subCellLiterals, vehicles );
     }
 
     // ==== Inner classes ==== :
@@ -47,22 +48,25 @@ public abstract class River extends Stampede {
             Calm.interactives = null;
         }
 
+        // ==== Interfaces ==== :
+
+        @Override
+        public void generateToys( SandBox sandbox ) {
+            // Nothing.
+        }
+
         // ==== Methods ==== :
 
         @Override
         /* Implements toy generation */
         public void paint( Terrain terrain, Collection<Vector> vectors ) throws NoSuchMethodException, NoSuchObjectException, IllegalArgumentException, UnsupportedOperationException, OutOfBoundsException, IllegalApiParameterException, InstantiationException, IllegalAccessException, InvocationTargetException {
             super.paint( terrain, vectors );
-
-            if( this.toys != null ) {
-                
-            }
         }
         
         // ==== Constructors ==== :
 
-        public Calm( Collection<Vector> vectors, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
-            super( vectors, terrain, Calm.subCellLiterals, Calm.interactives );
+        public Calm( Collection<Vector> vectors, SandBox sandbox, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
+            super( vectors, sandbox, terrain, Calm.subCellLiterals, Calm.interactives );
         }
     }
 }

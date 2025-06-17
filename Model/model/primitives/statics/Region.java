@@ -1,5 +1,5 @@
 // ==== Package ==== :
-package Model.model.statics.primitives;
+package Model.model.primitives.statics;
 
 // ==== General ==== :
 import java.awt.Rectangle;
@@ -8,8 +8,9 @@ import java.lang.reflect.Constructor;
 import java.util.HashSet;
 
 import Math.Vector;
-import Model.model.interactives.primitives.Toy;
-import Model.model.statics.Terrain;
+import Model.model.primitives.interactives.SandBox;
+import Model.model.primitives.interactives.Toy;
+import Model.model.primitives.interactives.ToyGenerator;
 import Util.Family;
 import Util.random.RandomSet;
 
@@ -29,13 +30,14 @@ import Util.TerrainAssociativeMutationException;
 
 
 
-public abstract class Region {
+public abstract class Region implements ToyGenerator{
 
     // ==== Fields ==== :
 
     /* CONCRETES: */
     protected RandomSet< Class<? extends Tile> > subCellLiterals;
-    protected RandomSet< Class<? extends Toy> > toys;
+    protected RandomSet< Class<? extends Toy> > toysLiterals;
+    protected Collection< Toy > toys;
 
     /* INSTANCES: */
     private Set<Tile> tiles;
@@ -45,6 +47,9 @@ public abstract class Region {
     // ==== Methods ==== :
 
     /* INSTANCES: */
+    public Collection<Tile> getTiles() {
+        return new HashSet<>( this.tiles );
+    }
     public Rectangle getContainer(){
         return this.container;
     }   // O( 1 )
@@ -113,16 +118,20 @@ public abstract class Region {
 
     // ==== Constructors ==== :
 
-    public Region( Collection<Vector> vectors, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
+    public Region( Collection<Vector> vectors, SandBox sandbox, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toyLiterals ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
         this.tiles = new HashSet<>();
         this.family = new Family( this );
 
         this.subCellLiterals = subCellLiterals;
-        this.toys = toys;
+        this.toysLiterals = toyLiterals;
 
         this.family.adopt( terrain );
         terrain.singRegionUp( this );
 
         this.paint( terrain, vectors );
+        this.container = Terrain.toRectangle( this.tiles );
+        this.toys = new HashSet<>();
+
+        this.generateToys( sandbox );
     }
 }

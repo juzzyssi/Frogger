@@ -1,5 +1,5 @@
 // ==== Package ==== :
-package Model.model.statics.primitives;
+package Model.model.primitives.statics;
 
 // ==== General ==== :
 import java.awt.*;
@@ -9,14 +9,11 @@ import java.util.HashMap;
 import Util.Family;
 
 import Math.Vector;
-
+import Model.model.primitives.interactives.Interactive;
 // ==== Interfaces ==== :
 import Engine.api.management.ifaces.ApiBindable;
 import Engine.api.management.primitives.ApiManager;
 import Engine.api.components.Renderable;
-
-import Model.model.interactives.api.Interactive;
-import Model.model.statics.Terrain;
 
 import java.util.Collection;
 import java.util.List;

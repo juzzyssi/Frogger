@@ -1,12 +1,11 @@
 // ==== Package ==== :
-package Model.model.dynamics.primitives;
+package Model.model.primitives.dynamics;
 
 // ==== Generals ==== :
 import Math.Vector;
 
 // ==== Interfaces ==== :
 import Engine.api.components.Continuous;
-import Model.model.dynamics.api.Accelerator;
 
 
 

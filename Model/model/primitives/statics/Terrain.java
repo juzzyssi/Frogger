@@ -1,5 +1,5 @@
 // ==== Package ==== :
-package Model.model.statics;
+package Model.model.primitives.statics;
 
 import java.awt.Dimension;
 
@@ -10,10 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import Engine.api.management.ContinuumRegistery;
 import Engine.api.management.RenderRegistery;
-
-import Model.model.statics.primitives.Tile;
-import Model.model.statics.primitives.Region;
-
 import Graphics.Camera;
 
 import Math.Vector;
@@ -30,6 +26,7 @@ import Engine.api.components.Continuous;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
+import Model.model.primitives.interactives.SandBox;
 import Engine.api.management.exceptions.IllegalApiParameterException;
 
 
@@ -68,7 +65,7 @@ public class Terrain implements Continuous {
             try{
                 this.updateFrame( camera );
             } catch( Exception e ) {
-                System.out.println( e.getMessage() );
+                e.printStackTrace();
             }
         }
     }
@@ -189,7 +186,7 @@ public class Terrain implements Continuous {
 
     /*  Returns the smallest rectangle containing all the provided tiles. 
      */
-    public static Rectangle toRectangle( Set<? extends Tile> tiles ){
+    public static Rectangle toRectangle( Collection<? extends Tile> tiles ){
         int lowX = Integer.MAX_VALUE, lowY = Integer.MAX_VALUE, upX = Integer.MIN_VALUE, upY = Integer.MIN_VALUE;
         Vector temp;
 
@@ -238,9 +235,9 @@ public class Terrain implements Continuous {
 
     /*  Creates a new region of the provided sub-class.
      */
-    public void paint( Collection<Vector> vectors, Class<? extends Region> region ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
-        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Collection.class, Terrain.class );
-        constructor.newInstance( vectors, this );
+    public void paint( Collection<Vector> vectors, Class<? extends Region> region, SandBox sandbox ) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {     // I.M.S. 3 ()
+        Constructor<? extends Region> constructor = region.getDeclaredConstructor( Collection.class, SandBox.class, Terrain.class );
+        constructor.newInstance( vectors, sandbox, this );
     }   // O( n )
 
     public double getWidth() {

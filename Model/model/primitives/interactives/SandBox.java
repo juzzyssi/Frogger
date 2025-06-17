@@ -1,5 +1,5 @@
 // ==== Package ==== :
-package Model.model.interactives.primitives;
+package Model.model.primitives.interactives;
 
 // ==== Generals ==== :
 import Engine.api.management.ContinuumRegistery;
@@ -8,10 +8,9 @@ import Engine.api.management.RenderRegistery;
 import java.util.HashSet;
 
 import Model.exceptions.world.OutOfBoundsException;
-import Model.model.interactives.exceptions.UnsupportedInteractionException;
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
-
+import Model.model.primitives.interactives.Interactive.UnsupportedInteractionException;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
 // ==== Interfaces ==== :
 import Engine.api.components.Continuous;
 

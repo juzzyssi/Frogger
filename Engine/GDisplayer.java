@@ -6,7 +6,7 @@ import java.awt.Dimension;
 
 import javax.swing.*;
 
-import Model.model.statics.primitives.Tile;
+import Model.model.primitives.statics.Tile;
 
 
 

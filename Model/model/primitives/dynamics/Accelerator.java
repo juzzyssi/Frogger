@@ -1,4 +1,4 @@
-package Model.model.dynamics.api;
+package Model.model.primitives.dynamics;
 
 import Math.Vector;
 

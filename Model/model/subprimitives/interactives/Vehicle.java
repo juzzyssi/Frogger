@@ -1,12 +1,12 @@
 // ==== Package ==== :
-package Model.model.templates.interactives.subcategories;
+package Model.model.subprimitives.interactives;
 
 // ==== Generals ==== :
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import Model.model.interactives.primitives.Toy;
+import Model.model.primitives.interactives.Toy;
 import Model.model.templates.dynamics.accelerators.Path;
 
 import Math.Curves;

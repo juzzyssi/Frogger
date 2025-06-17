@@ -1,10 +1,9 @@
 // ==== Package ==== :
-package Model.model.templates.interactives.subcategories;
+package Model.model.subprimitives.interactives;
 
 // ==== Generals ==== :
 import Math.Vector;
-
-import Model.model.interactives.primitives.Toy;
+import Model.model.primitives.interactives.Toy;
 
 import java.awt.Dimension;
 

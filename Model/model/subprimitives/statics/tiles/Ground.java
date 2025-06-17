@@ -1,12 +1,9 @@
 // ==== Package ==== :
-package Model.model.templates.statics.tile.subcategories;
+package Model.model.subprimitives.statics.tiles;
 
-// ==== Generals ==== :
-import Model.model.statics.primitives.Tile;
-import Model.model.interactives.api.Interactive;
-import Model.model.interactives.exceptions.UnsupportedInteractionException;
-import Model.model.statics.Terrain;
-
+import Model.model.primitives.interactives.Interactive;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
 import Math.Vector;
 
 // ==== Interfaces ==== :

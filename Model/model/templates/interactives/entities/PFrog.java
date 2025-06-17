@@ -1,14 +1,11 @@
 // ==== Package ==== :
 package Model.model.templates.interactives.entities;
 
-import Model.model.interactives.api.Interactive;
-import Model.model.interactives.exceptions.UnsupportedInteractionException;
-
-// ==== Generals ==== :
-import Model.model.interactives.primitives.SandBox;
-import Model.model.statics.primitives.Tile;
+import Model.model.primitives.interactives.Interactive;
+import Model.model.primitives.interactives.SandBox;
+import Model.model.primitives.statics.Tile;
+import Model.model.subprimitives.interactives.Entity;
 import Model.model.templates.dynamics.accelerators.PImpluse;
-import Model.model.templates.interactives.subcategories.Entity;
 import Util.threads.IllegalOrderException;
 import Util.threads.ThreadElement;
 import Engine.api.components.Continuous;

@@ -11,7 +11,7 @@ import Engine.user.User;
 import Graphics.Camera;
 import Math.Vector;
 import Model.model.World;
-import Model.model.statics.primitives.Tile;
+import Model.model.primitives.statics.Tile;
 import Model.model.templates.statics.region.biomes.Forest;
 import Model.model.templates.statics.region.stampedes.Highway;
 import Model.model.templates.statics.region.stampedes.River;
@@ -83,10 +83,10 @@ public class GRunner extends JPanel implements ActionListener {
             this.model = new World( this.user, cameraDimensions, Forest.Light.class );
             
             Rectangle river = new Rectangle( 0, Tile.BLOCK.height, 14*Tile.BLOCK.width, 5*Tile.BLOCK.height );
-            this.model.getTerrain().paint( this.model.getTerrain().getVectors( river ), River.Calm.class );
+            this.model.getTerrain().paint( this.model.getTerrain().getVectors( river ), River.Calm.class, this.model.getSandBox() );
 
             Rectangle highway = new Rectangle( 0, 7*Tile.BLOCK.height, 14*Tile.BLOCK.width, 5*Tile.BLOCK.height );
-            this.model.getTerrain().paint( this.model.getTerrain().getVectors( highway ), Highway.Light.class );
+            this.model.getTerrain().paint( this.model.getTerrain().getVectors( highway ), Highway.Light.class, this.model.getSandBox() );
         }
 
 

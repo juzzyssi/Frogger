@@ -1,14 +1,11 @@
 // ==== Package ==== :
-package Model.model.dynamics.primitives;
+package Model.model.primitives.dynamics;
 
 import java.util.Collection;
 // ==== General ==== :
 import java.util.HashSet;
 
 import Math.Vector;
-
-// ==== Interfaces ==== :
-import Model.model.dynamics.api.Accelerator;
 
 
 

@@ -1,10 +1,11 @@
 // ==== Package ==== :
 package Model.model.templates.statics.region.biomes;
 
-import Model.model.interactives.primitives.Toy;
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
-import Model.model.templates.statics.region.subcategories.Biome;
+import Model.model.primitives.interactives.SandBox;
+import Model.model.primitives.interactives.Toy;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
+import Model.model.subprimitives.statics.region.Biome;
 import Model.model.templates.statics.tile.ground.Grass;
 
 import java.rmi.NoSuchObjectException;
@@ -28,8 +29,8 @@ public abstract class Forest extends Biome{
 
     // ==== Constructors ==== :
 
-    public Forest( Collection<Vector> vectors, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
-        super( vectors, terrain, subCellLiterals, toys );
+    public Forest( Collection<Vector> vectors, SandBox sandbox, Terrain terrain, RandomSet< Class<? extends Tile> > subCellLiterals, RandomSet< Class<? extends Toy> > toys ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException{
+        super( vectors, sandbox, terrain, subCellLiterals, toys );
     }
 
     // ==== Inner classes ==== :
@@ -49,10 +50,17 @@ public abstract class Forest extends Biome{
             Light.interactives = null;
         }
 
+        // ==== Interfaces ==== :
+
+        @Override
+        public void generateToys( SandBox sanbox ) {
+            // Nothing.
+        }
+
         // ==== Constructors ==== :
         
-        public Light( Collection<Vector> vectors, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
-            super( vectors, terrain, Light.subCellLiterals, Light.interactives );
+        public Light( Collection<Vector> vectors, SandBox sandbox, Terrain terrain ) throws NoSuchObjectException, NoSuchMethodException, IllegalArgumentException, UnsupportedOperationException, InstantiationException, IllegalAccessException, InvocationTargetException, OutOfBoundsException, IllegalApiParameterException, TerrainAssociativeMutationException {
+            super( vectors, sandbox, terrain, Light.subCellLiterals, Light.interactives );
         }
     }
 }

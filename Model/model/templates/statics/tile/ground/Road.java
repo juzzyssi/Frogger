@@ -1,9 +1,9 @@
 // ==== Package ==== :
 package Model.model.templates.statics.tile.ground;
 
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
-import Model.model.templates.statics.tile.subcategories.Ground;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
+import Model.model.subprimitives.statics.tiles.Ground;
 import Util.random.RandomObject;
 import Util.random.RandomSet;
 

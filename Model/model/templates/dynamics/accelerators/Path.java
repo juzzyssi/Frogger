@@ -7,7 +7,7 @@ import Util.threads.IllegalOrderException;
 
 import Math.Curves;
 import Math.Vector;
-
+import Model.model.primitives.dynamics.Accelerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +15,15 @@ import java.util.HashMap;
 // ==== Interfaces ==== :
 import Engine.api.components.Continuous;
 
-import Model.model.dynamics.api.Accelerator;
-
 import java.util.List;
 
+/*  ___________________________________________________________________________________________________________________________________________
 
+ *  Paths provide routing & engine-synchronized displacement logic for vehicles to operate; the "route" is defined by an arranged collection of
+ *  vectors, processed by bezier curves. Such "progress" is defined by the provided long that's representative of a time measure.
+
+ *  ____________________________________________________________________________________________________________________________________________
+ */
 
 public class Path implements Accelerator, Continuous{
 

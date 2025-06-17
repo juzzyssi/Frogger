@@ -1,12 +1,11 @@
 // ==== Package ==== :
 package Model.model;
 
-import Model.model.interactives.primitives.SandBox;
-// ==== Generals ==== :
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
+import Model.model.primitives.interactives.SandBox;
+import Model.model.primitives.statics.Region;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
 import Model.model.templates.interactives.entities.PFrog;
-import Model.model.statics.primitives.Region;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -55,7 +54,7 @@ public class World{
         this.terrain = new Terrain( this.renderRg, this.continuumRg, plate );
         System.out.format( "The World's terrain has been set to: width=%d, height=%d%nrows=%d, columns=%d%n", worldInitWidth, worldInitHeight, this.terrain.getRows(), this.terrain.getColumns() );
 
-        this.getTerrain().paint( terrain.toVectors(), clazz );
+        this.getTerrain().paint( terrain.toVectors(), clazz, this.sandbox );
 
         // setting up the spawn:
         this.spawns = new LinkedList<>();

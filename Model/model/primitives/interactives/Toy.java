@@ -1,19 +1,15 @@
 // ==== Package ==== :
-package Model.model.interactives.primitives;
+package Model.model.primitives.interactives;
 
 // ==== Generals ==== :
 import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import Math.Vector;
-
-import Model.model.dynamics.primitives.Dynamic;
-
 // ==== Interfaces ==== :
 import Engine.api.components.Renderable;
 import Engine.api.management.ifaces.ApiBindable;
-
-import Model.model.interactives.api.Interactive;
+import Model.model.primitives.dynamics.Dynamic;
 
 
 

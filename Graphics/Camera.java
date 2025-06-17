@@ -4,7 +4,7 @@ import javax.swing.JPanel;
 
 import Engine.api.management.RenderRegistery;
 import Math.Vector;
-import Model.model.statics.Terrain;
+import Model.model.primitives.statics.Terrain;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

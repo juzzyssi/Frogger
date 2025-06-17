@@ -1,22 +1,19 @@
 // ==== Package ==== :
-package Model.model.templates.statics.tile.subcategories;
+package Model.model.subprimitives.statics.tiles;
 
-// ==== Generals ==== :
-import Model.model.statics.Terrain;
-import Model.model.statics.primitives.Tile;
-import Model.model.templates.interactives.subcategories.Entity;
 import Math.Vector;
 
 // ==== Interfaces ==== :
 import java.util.List;
 import java.util.Map;
 
-import Model.model.interactives.api.Interactive;
-
 // ==== Exceptions ==== :
 import Util.threads.IllegalOrderException;
 
-import Model.model.interactives.exceptions.UnsupportedInteractionException;
+import Model.model.primitives.interactives.Interactive;
+import Model.model.primitives.statics.Terrain;
+import Model.model.primitives.statics.Tile;
+import Model.model.subprimitives.interactives.Entity;
 
 
 

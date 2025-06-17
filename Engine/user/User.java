@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import Engine.user.UserListener.UserKeyboardEvent;
+import Engine.user.UserListener.UserMouseEvent;
 import Math.Vector;
 
 import java.util.Arrays;
@@ -22,9 +24,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import Engine.user.api.UserListener;
-import Engine.user.api.UserListener.UserKeyboardEvent;
-import Engine.user.api.UserListener.UserMouseEvent;
 
 
 

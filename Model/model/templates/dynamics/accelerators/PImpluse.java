@@ -1,13 +1,23 @@
+// ==== Package ==== :
 package Model.model.templates.dynamics.accelerators;
 
+// ==== Generals ====:
 import java.awt.event.KeyEvent;
 
 import Engine.user.User;
-import Engine.user.api.UserListener;
+import Engine.user.UserListener;
 import Math.Vector;
-import Model.model.dynamics.api.Accelerator;
-import Model.model.statics.primitives.Tile;
+import Model.model.primitives.dynamics.Accelerator;
+import Model.model.primitives.statics.Tile;
 
+
+/*  ___________________________________________________________________________________________________________________________________________
+
+ *  PFrog instances demands real-time "user's" input as part of its process; PImpulse instances respond to real-time demands with engine-synchronized
+ *  & logic-integrated displacement by queuing processed outputs.
+
+ *  ____________________________________________________________________________________________________________________________________________
+ */
 
 
 public class PImpluse implements Accelerator, UserListener{

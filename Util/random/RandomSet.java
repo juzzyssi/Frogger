@@ -133,38 +133,36 @@ public class RandomSet<T> extends java.util.ArrayList<RandomObject<T>>{
 
     // ==== Constructors ==== :
     
-    @SuppressWarnings("unchecked")
-    public RandomSet(ArrayList<?> list) throws EmptyStackException{
-        super(0);
-        boolean hasRandomBaseObject = false;
 
-        if (list.isEmpty()){
+    @SuppressWarnings("unchecked")
+    public RandomSet(ArrayList<?> list) throws EmptyStackException {
+        super(0);
+
+        if (list.isEmpty()) {
             throw new EmptyStackException();
         }
-        else{
 
-            Object sample = list.get(0);
-            if (sample instanceof RandomObject){
-                RandomObject<T> casted_i;
-                for( Object i : list ){
-                    casted_i = (RandomObject<T>)(i);
-                    hasRandomBaseObject = !hasRandomBaseObject && casted_i.isBaseObject() ? true : false ; 
-                    this.add( casted_i );
-                }
-            }
-            else{
-                for( int i=0 ; i<list.size() ; i++ ){
-                    T object = (T) list.get(i);
-                    this.set(i, new RandomObject<>(object, RandomSet.STANDARD_ODDS ));
-                }
+        boolean hasBaseObject = false;
+
+        if (list.get(0) instanceof RandomObject) {
+            for (Object o : list) {
+                RandomObject<T> ro = (RandomObject<T>) o;
+                hasBaseObject |= ro.isBaseObject();
+                this.add(ro);
             }
 
-            if( !hasRandomBaseObject ){
-                /* If the RandomSet doesn't have any "baseObject", the constructor assigns one randomly" */
-                RandomSet.AssignRandomBaseObject( this );
+        } else {
+            for (Object o : list) {
+                T obj = (T) o;
+                this.add(new RandomObject<>(obj, RandomSet.STANDARD_ODDS));
             }
         }
+
+        if (!hasBaseObject) {
+            RandomSet.AssignRandomBaseObject(this);
+        }
     }
+
     public RandomSet( RandomObject<T> base ){
         super(0);
         base.setBaseObject(true);
