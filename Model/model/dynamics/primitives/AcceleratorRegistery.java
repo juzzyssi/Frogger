@@ -16,7 +16,6 @@ public class AcceleratorRegistery extends HashSet<Accelerator> implements Accele
 
     // ==== Fields ==== :
 
-    protected boolean reset;
     protected Collection<Accelerator> queue;
     
     // ==== Interfaces ==== :
@@ -30,17 +29,10 @@ public class AcceleratorRegistery extends HashSet<Accelerator> implements Accele
             out = Vector.add( out, acc.getAccDisp() );
         }
 
-        if( this.reset ) {
-            this.clear();
-        }
         return out;
     }
 
     // ==== Methods ==== :
-
-    public void setReset( boolean state ) {
-        this.reset = state;
-    }
 
     public void queueRemoval( Accelerator acc ) {
         this.queue.add(acc);
@@ -54,7 +46,6 @@ public class AcceleratorRegistery extends HashSet<Accelerator> implements Accele
     // ==== Constructors ==== :
     public AcceleratorRegistery() {
         super();
-        this.reset = true;
         this.queue = new HashSet<>();
     }
 }

@@ -59,10 +59,10 @@ public class ContinuumRegistery extends ApiRegistery<Continuous> implements Cont
         this.queueRemoval( object.toThreadElementOf( Continuous.class ) ); 
     }
 
-
     // ==== Constructors ==== :
 
     public ContinuumRegistery(){
+        super();
         this.updated = false;
     }
 }

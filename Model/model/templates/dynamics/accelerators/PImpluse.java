@@ -6,6 +6,7 @@ import Engine.user.User;
 import Engine.user.api.UserListener;
 import Math.Vector;
 import Model.model.dynamics.api.Accelerator;
+import Model.model.statics.primitives.Tile;
 
 
 
@@ -70,13 +71,15 @@ public class PImpluse implements Accelerator, UserListener{
             sum = Vector.add( sum, new Vector(1, 0));
         }
 
-        return sum.getUnitVector();
+        return sum;
     }
 
     // ==== Constructors ==== :
     
     public PImpluse( User user ) {
         this.user = user;
+        user.addUserKeyboardListener( this );
         this.queuedDisp = null;
+        this.jumpDisp = Tile.BLOCK.width;
     }
 }

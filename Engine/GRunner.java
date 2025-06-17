@@ -13,6 +13,7 @@ import Math.Vector;
 import Model.model.World;
 import Model.model.statics.primitives.Tile;
 import Model.model.templates.statics.region.biomes.Forest;
+import Model.model.templates.statics.region.stampedes.Highway;
 import Model.model.templates.statics.region.stampedes.River;
 
 
@@ -81,8 +82,11 @@ public class GRunner extends JPanel implements ActionListener {
         {
             this.model = new World( this.user, cameraDimensions, Forest.Light.class );
             
-            Rectangle square = new Rectangle( 0, Tile.BLOCK.height, 14*Tile.BLOCK.width, 2*Tile.BLOCK.height );
-            this.model.getTerrain().paint( this.model.getTerrain().getVectors( square ), River.Calm.class );
+            Rectangle river = new Rectangle( 0, Tile.BLOCK.height, 14*Tile.BLOCK.width, 5*Tile.BLOCK.height );
+            this.model.getTerrain().paint( this.model.getTerrain().getVectors( river ), River.Calm.class );
+
+            Rectangle highway = new Rectangle( 0, 7*Tile.BLOCK.height, 14*Tile.BLOCK.width, 5*Tile.BLOCK.height );
+            this.model.getTerrain().paint( this.model.getTerrain().getVectors( highway ), Highway.Light.class );
         }
 
 
@@ -92,6 +96,5 @@ public class GRunner extends JPanel implements ActionListener {
         this.add( this.camera, BorderLayout.CENTER );
         
         this.timer.start();
-
     }
 }

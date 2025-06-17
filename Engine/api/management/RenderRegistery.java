@@ -41,7 +41,6 @@ public class RenderRegistery extends ApiRegistery<Renderable> implements Rendera
 
     @Override
     public void add( ApiBindable object ) throws IllegalApiParameterException{
-        // System.out.println( object.toThreadElementOf( Renderable.class ).getObject() );
         this.add( object.toThreadElementOf( Renderable.class ) );
     }
 

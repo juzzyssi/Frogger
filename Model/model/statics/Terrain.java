@@ -2,13 +2,12 @@
 package Model.model.statics;
 
 import java.awt.Dimension;
+
 // ==== Generals ==== :
-import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import Engine.api.management.primitives.ApiRegistery;
 import Engine.api.management.ContinuumRegistery;
 import Engine.api.management.RenderRegistery;
 
@@ -24,11 +23,10 @@ import Util.DimensionalList2D;
 import java.util.HashSet;
 
 // ==== Interfaces ==== :
-import Engine.api.components.Continuous;
-import Engine.api.components.Renderable;
-
 import java.util.Collection;
 import java.util.Set;
+
+import Engine.api.components.Continuous;
 
 // ==== Exceptions ==== :
 import Model.exceptions.world.OutOfBoundsException;
@@ -36,7 +34,7 @@ import Engine.api.management.exceptions.IllegalApiParameterException;
 
 
 
-public class Terrain implements Renderable, Continuous {
+public class Terrain implements Continuous {
 
     // ==== Fields ==== :
 
@@ -44,9 +42,8 @@ public class Terrain implements Renderable, Continuous {
     public static final int X = 0, Y = 1;
 
     /* INSTANCES: */
-    private RenderRegistery renderApi; // Shallow reference.
-    private ContinuumRegistery continuumApi; // Shallow reference.
-    private Set<ApiRegistery<?>> apis;
+    private RenderRegistery renderRg;
+    private ContinuumRegistery continuumRg;
 
     private DimensionalList2D<Tile> tiles;
     private Set<Region> regions;
@@ -73,27 +70,14 @@ public class Terrain implements Renderable, Continuous {
             } catch( Exception e ) {
                 System.out.println( e.getMessage() );
             }
-            
-            /* Continuum updating: */
-            this.continuumApi.checkIn( time, args );
         }
     }
 
     @Override
     public void checkOut( long time, Object... args ){
         if( this.updated ) {
-            this.updated = false;            
-            this.continuumApi.checkOut(time, args);
-
-            this.continuumApi.executeRemovalQueue();
-            this.renderApi.executeRemovalQueue();
+            this.updated = false;
         }
-    }
-
-    // Renderable:
-    @Override
-    public void render( Graphics g, Camera camera ){
-        this.renderApi.render(g, camera);
     }
 
     // ======== General Functionality ======== :
@@ -165,28 +149,38 @@ public class Terrain implements Renderable, Continuous {
 
     /* INSTANCES: */
     public void adoptToAllAPIs( Tile tile ) {
-        for( ApiRegistery<?> i : this.apis ) {
-            try{
-                i.add( tile );
-            } catch( IllegalApiParameterException e ) {
-                System.out.println( e.getMessage() );
-            }
+
+        try{
+            this.renderRg.add( tile );
+        } catch( IllegalApiParameterException e ) {
+            System.out.println( e.getMessage() );
+        }
+
+        try{
+            this.continuumRg.add( tile );
+        } catch( IllegalApiParameterException e ) {
+            System.out.println( e.getMessage() );
         }
     }   // O( 1 )
 
     public void queueRemovalFromAllAPIs( Tile tile ) {
-        for( ApiRegistery<?> i : this.apis ) {
-            try{
-                i.queueRemoval( tile );
-            } catch( IllegalApiParameterException e ) {
-                System.out.println( e.getMessage() );
-            }
+
+        try{
+            this.renderRg.queueRemoval( tile );
+        } catch( IllegalApiParameterException e ) {
+            System.out.println( e.getMessage() );
+        }
+
+        try{
+            this.continuumRg.queueRemoval( tile );
+        } catch( IllegalApiParameterException e ) {
+            System.out.println( e.getMessage() );
         }
     }   // O( 1 )
     
     public void executeAPIRemovalQueue(){
-        this.renderApi.executeRemovalQueue();
-        this.continuumApi.executeRemovalQueue();
+        this.renderRg.executeRemovalQueue();
+        this.continuumRg.executeRemovalQueue();
     }   // O( n )
 
     // ======== Terrain Processes ======== :
@@ -272,13 +266,10 @@ public class Terrain implements Renderable, Continuous {
     // ==== Constructors ==== :
     
     public Terrain( RenderRegistery renderRg, ContinuumRegistery continuumRg, Rectangle chunck ) {
-        this.renderApi = renderRg;
-        this.continuumApi = continuumRg;
         this.updated = false;
 
-        this.apis = new HashSet<>();
-        this.apis.add( this.renderApi );
-        this.apis.add( this.continuumApi );
+        this.continuumRg = continuumRg;
+        this.renderRg = renderRg;
 
         this.regions = new HashSet<>();
         this.tiles = new DimensionalList2D<>( Tile.BLOCK, chunck );

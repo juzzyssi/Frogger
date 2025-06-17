@@ -41,8 +41,6 @@ public abstract class Dynamic implements Continuous{
         }
     }
 
-    // ======== General Functionality ======== :
-
     // ==== Methods ==== :
 
     /* INSTANCES: */
@@ -68,13 +66,13 @@ public abstract class Dynamic implements Continuous{
         this.accelerators.add( acc );
     }
 
-    public void removeAccelerator( Accelerator acc ) {
-        this.accelerators.remove( acc );
+    public void queueAcceleratorRemoval( Accelerator acc ) {
+        this.accelerators.queueRemoval(acc);
     }
 
     public boolean hasAccelerator( Accelerator acc ) {
         return this.accelerators.contains( acc );
-    } 
+    }
 
     // ==== Constructors ==== :
     public Dynamic( Vector disp ) {

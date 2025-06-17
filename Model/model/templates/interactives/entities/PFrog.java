@@ -28,9 +28,6 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
-// ==== Interfaces ==== :
-import Model.model.dynamics.api.Accelerator;
-
 
 
 public class PFrog extends Entity{
@@ -43,7 +40,7 @@ public class PFrog extends Entity{
     static{
         HashMap< Integer, List<Class<?>> > temp = new HashMap<>();                
         // ======== //
-        ArrayList<Class<?>> order_2 = new ArrayList<>();
+        ArrayList<Class<?>> order_2 = new ArrayList<>(2);
         order_2.add( Renderable.class );
         order_2.add( Continuous.class );
 
@@ -55,7 +52,6 @@ public class PFrog extends Entity{
     /* INSTANCES: */
     private Image image;
     protected SandBox sandbox;
-    private Accelerator playerImpulse;
     private ApiManager<PFrog> apiManager;
 
     // ==== Interfaces ==== :
@@ -88,9 +84,7 @@ public class PFrog extends Entity{
 
     public PFrog( User user, Vector displacement ) throws IllegalOrderException {
         super( displacement, new Dimension(Tile.BLOCK) );
-        
-        this.playerImpulse = new PImpluse( user );
-        this.accelerators.add( this.playerImpulse );
+        this.accelerators.add( new PImpluse( user ) );
         
         this.apiManager = new ApiManager<PFrog>( PFrog.DEAFULT_ORDER, this);
         this.image = PFrog.IMAGE;

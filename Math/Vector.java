@@ -70,7 +70,7 @@ public class Vector {
         return this.projections.length;
     }
 
-    public double getAbs(){
+    public long getAbs(){
         long sum = 0;
         for( long comp : this.projections ) {
             sum += comp*comp;
@@ -175,8 +175,8 @@ public class Vector {
     public Vector getUnitVector() {
         Vector out = new Vector( this.size() );
 
-        double abs = this.getAbs();
-        if( !(-0.00005 < abs && abs < 0.00005) ) {
+        long abs = this.getAbs();
+        if( abs != 0 ) {
             out = this.scale( 1 / abs );
         }
 

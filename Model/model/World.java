@@ -96,18 +96,19 @@ public class World{
     public void checkIn( long time, Camera camera ) throws Exception{
         if( !this.updated ){
             this.updated = true;
-
             this.continuumRg.checkIn( time );
+            
             this.terrain.checkIn( time, camera );
-            this.sandbox.checkIn( time, this.sandbox );
+            this.sandbox.checkIn( time, this.terrain );
         }
     }
     
     public void checkOut( long time ) throws Exception{
         if( this.updated ){
-            this.continuumRg.checkIn( time );
-            this.terrain.checkOut(time, null);
-            this.sandbox.checkOut(time, null);
+            this.continuumRg.checkOut( time );
+            
+            this.terrain.checkOut( time, null );
+            this.sandbox.checkOut( time, null );
             
             this.continuumRg.executeRemovalQueue();
             this.renderRg.executeRemovalQueue();

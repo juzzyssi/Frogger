@@ -4,24 +4,17 @@ package Model.model.interactives.primitives;
 // ==== Generals ==== :
 import Engine.api.management.ContinuumRegistery;
 import Engine.api.management.RenderRegistery;
-import Engine.api.management.primitives.ApiManager;
-import Engine.api.management.primitives.ApiRegistery;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import Model.exceptions.world.OutOfBoundsException;
 import Model.model.interactives.exceptions.UnsupportedInteractionException;
 import Model.model.statics.Terrain;
 import Model.model.statics.primitives.Tile;
-import Util.threads.ThreadElement;
 
 // ==== Interfaces ==== :
 import Engine.api.components.Continuous;
-import Engine.api.management.ifaces.ApiBindable;
 
-import java.util.List;
 import java.util.Set;
 
 // ==== Exceptions ==== :
@@ -31,34 +24,20 @@ import Util.threads.IllegalOrderException;
 
 
 
-public class SandBox implements Continuous, ApiBindable{
+public class SandBox implements Continuous {
 
     // ==== Fields ==== :
 
-    /* CONCRETES: */
-    protected static HashMap< Integer, List<Class<?>> > DEAFULT_ORDER;
-    static{
-        HashMap< Integer,  List<Class<?>> > temp = new HashMap<>(); 
-        // ==== //
-        ArrayList<Class<?>> order_1 = new ArrayList<>();
-        order_1.add( Continuous.class );
-
-        temp.put( 1, order_1 );
-        // ==== //
-        SandBox.DEAFULT_ORDER = temp;
-    }
-
     /* INTERACTIVES: */
     private Set<Toy> toys;
-    private Set<ApiRegistery<?>> apis;
+    private RenderRegistery renderRg;
+    private ContinuumRegistery continuumRg;
     
-    private ContinuumRegistery continuumApi; // Shallow reference.
-    private RenderRegistery renderApi;  // Shallow reference.
+    // private Set<ApiRegistery<?>> apis;
 
     private boolean updated;
 
     private Set<Toy> removalQueue;
-    private ApiManager<SandBox> apiManager;
 
     // ==== Interfaces ==== :
     
@@ -79,24 +58,23 @@ public class SandBox implements Continuous, ApiBindable{
         }
     }
 
-    // Api bindable:
-    @Override
-    public <T> ThreadElement<T> toThreadElementOf( Class<T> clazz ) throws IllegalApiParameterException {
-        return apiManager.getAs( clazz );
-    }
-
     // ==== Methods ==== :
 
     /* INSTANCES: */
     public void add( Toy... toys ) {
         for( Toy toy : toys ) {
             this.toys.add( toy );
-            for( ApiRegistery<?> registery : this.apis ) {
-                try{
-                    registery.add( toy );
-                } catch( IllegalApiParameterException e ) {
-                    // Nothing.
-                }
+
+            try{
+                this.renderRg.add( toy );
+            } catch( IllegalApiParameterException e ) {
+                // Nothing.
+            }
+
+            try{
+                this.continuumRg.add( toy );
+            } catch( IllegalApiParameterException e ) {
+                // Nothing.
             }
         }
     }
@@ -105,12 +83,16 @@ public class SandBox implements Continuous, ApiBindable{
         if( this.toys.contains(toy) ) {
             this.removalQueue.add( toy );
 
-            for( ApiRegistery<?> registery : this.apis ) {
-                try {
-                    registery.queueRemoval(toy);
-                } catch (IllegalApiParameterException e) {
-                    e.printStackTrace();
-                }
+            try{
+                this.renderRg.queueRemoval( toy );
+            } catch(IllegalApiParameterException e) {
+                e.printStackTrace();                
+            }
+
+            try{
+                this.continuumRg.queueRemoval( toy );
+            } catch(IllegalApiParameterException e) {
+                e.printStackTrace();                
             }
         }
     }
@@ -157,21 +139,12 @@ public class SandBox implements Continuous, ApiBindable{
     // ==== Constructors ==== :
 
     public SandBox( ContinuumRegistery continuumApi, RenderRegistery renderApi ) throws IllegalOrderException {
-        this.apiManager = new ApiManager<SandBox>( SandBox.DEAFULT_ORDER, this);
         this.toys = new HashSet<>();
 
-        this.continuumApi = continuumApi;
         this.updated = false;
-        try{
-            this.continuumApi.add( this );
-        } catch( IllegalApiParameterException e ) {
-            e.printStackTrace();
-        }
-        this.renderApi = renderApi;
 
-        this.apis = new HashSet<>();
-        this.apis.add( this.renderApi );
-        this.apis.add( this.continuumApi );
+        this.renderRg = renderApi;
+        this.continuumRg = continuumApi;
 
         this.removalQueue = new HashSet<>();
     }
